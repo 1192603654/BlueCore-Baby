@@ -1,0 +1,116 @@
+/* Top Baby Scroll */
+.baby-scroll {
+  width: 100%;
+  white-space: nowrap;
+  margin-bottom: 40rpx;
+}
+
+.baby-list {
+  display: flex;
+  padding: 10rpx 0;
+}
+
+.baby-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 40rpx;
+  opacity: 0.6;
+  transition: all 0.3s;
+}
+
+.baby-item.active {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.avatar, .avatar-placeholder {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  border: 4rpx solid transparent;
+}
+
+.baby-item.active .avatar {
+  border-color: var(--brand-blue);
+}
+
+.avatar-placeholder {
+  background-color: #EAEAEA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60rpx;
+  color: #999;
+}
+
+.name {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+/* Status Section */
+.status-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.status-card {
+  display: flex;
+  flex-direction: column;
+  padding: 40rpx;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.card-body {
+  display: flex;
+  align-items: baseline;
+  gap: 10rpx;
+}
+
+.value {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: var(--brand-blue);
+}
+
+.sub-type {
+  font-size: 28rpx;
+  color: #666;
+}
+
+/* Ad Container */
+.ad-container {
+  margin-top: auto;
+  padding-top: 40rpx;
+}
+
+.mock-ad {
+  width: 100%;
+  height: 200rpx;
+  background-color: #E8E8E8;
+  border-radius: var(--card-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
