@@ -4,13 +4,18 @@ from sqlalchemy.ext.declarative import declarative_base
 
 import os
 
-# 按照要求，生产/开发环境使用 MySQL。确保已安装 pymysql。
-# 若本地测试，确保 MySQL 服务正在运行并创建了该数据库，或者在需要时更换连接字符串为 sqlite。
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://user:password@localhost/bluecore_baby")
+# 使用 SQLite 作为本地默认测试数据库，如果配置了 DATABASE_URL 环境变量则使用该环境变量（例如生产环境的 MySQL）
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./bluecore_baby.db")
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL
-)
+# 如果使用的是 sqlite，需要添加特殊的连接参数防止多线程问题
+if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    )
+else:
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL
+    )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

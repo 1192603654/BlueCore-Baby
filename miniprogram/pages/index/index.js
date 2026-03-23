@@ -10,6 +10,7 @@ Page({
     lastFeed: {},
     lastDiaper: {},
     lastSleep: {},
+    lastVaccine: {},
     showAd: false
   },
 
@@ -80,6 +81,13 @@ Page({
       return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
   },
 
+  formatDate(dateString) {
+      if (!dateString) return null;
+      const utcString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
+      const date = new Date(utcString);
+      return `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  },
+
   loadRecentRecords: function () {
     const babyId = this.data.currentBabyId;
     if (!babyId) return;
@@ -99,6 +107,10 @@ Page({
         lastSleep: {
             time: records.sleep ? this.formatTime(records.sleep.start_time) : null,
             duration: records.sleep ? '已睡着' : null
+        },
+        lastVaccine: {
+            date: records.vaccine ? this.formatDate(records.vaccine.start_time) : null,
+            sub_type: records.vaccine ? records.vaccine.sub_type : null
         }
       });
     }).catch(err => {
@@ -158,5 +170,47 @@ Page({
   recordSleep: function () {
       // 记录睡眠操作的预留方法
       wx.showToast({ title: '点击了记录睡眠', icon: 'none' });
+  },
+
+  recordVaccine: function () {
+    const babyId = this.data.currentBabyId;
+    if (!babyId) {
+      wx.showToast({ title: '请先选择或添加一个宝宝', icon: 'none' });
+      return;
+    }
+
+    wx.showActionSheet({
+      itemList: ['乙肝疫苗', '卡介苗', '脊灰疫苗', '百白破', '其他 (手动输入)'],
+      success: (res) => {
+        const items = ['乙肝疫苗', '卡介苗', '脊灰疫苗', '百白破', '其他'];
+        let selectedItem = items[res.tapIndex];
+
+        if (selectedItem === '其他') {
+            wx.showModal({
+                title: '手动输入疫苗',
+                editable: true,
+                placeholderText: '请输入疫苗名称',
+                success: (modalRes) => {
+                    if (modalRes.confirm && modalRes.content) {
+                        this.submitVaccineRecord(babyId, modalRes.content);
+                    }
+                }
+            });
+        } else {
+            this.submitVaccineRecord(babyId, selectedItem);
+        }
+      }
+    });
+  },
+
+  submitVaccineRecord: function (babyId, subType) {
+      api.post('/records', {
+          baby_id: babyId,
+          type: 'vaccine',
+          sub_type: subType,
+      }).then(record => {
+          wx.showToast({ title: '记录成功' });
+          this.loadRecentRecords();
+      });
   }
 });
