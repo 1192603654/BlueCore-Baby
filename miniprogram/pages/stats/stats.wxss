@@ -1,0 +1,122 @@
+.container {
+  padding: 30rpx;
+}
+
+.date-picker-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40rpx;
+}
+
+.date-display {
+  display: flex;
+  align-items: center;
+  background-color: #FFF;
+  padding: 16rpx 32rpx;
+  border-radius: 40rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.calendar-icon {
+  margin-right: 12rpx;
+  font-size: 28rpx;
+}
+
+.date-text {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.arrow {
+  margin-left: 10rpx;
+  font-size: 20rpx;
+  color: #999;
+}
+
+/* 统计卡片网格 */
+.stats-grid {
+  display: flex;
+  gap: 30rpx;
+  margin-bottom: 40rpx;
+}
+
+.stat-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 40rpx 30rpx;
+  border-radius: var(--card-radius);
+  color: #333;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+}
+
+.feed-stat {
+  background-color: #F0F8FF;
+}
+
+.diaper-stat {
+  background-color: #FFFDF5;
+}
+
+.stat-title {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 15rpx;
+}
+
+.stat-value-group {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+}
+
+.stat-number {
+  font-size: 64rpx;
+  font-weight: bold;
+}
+
+.feed-stat .stat-number { color: var(--brand-blue); }
+.diaper-stat .stat-number { color: #D4A346; }
+
+.stat-unit {
+  font-size: 28rpx;
+  color: #888;
+}
+
+.stat-sub {
+  margin-top: auto;
+  padding-top: 15rpx;
+  font-size: 24rpx;
+  color: #888;
+}
+
+/* AI 卡片 */
+.ai-card {
+  background: linear-gradient(135deg, #FDFBF7 0%, #F5FAFE 100%);
+  border: 2rpx solid rgba(167, 199, 231, 0.3);
+}
+
+.ai-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.ai-icon {
+  margin-right: 10rpx;
+  font-size: 32rpx;
+}
+
+.ai-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--brand-blue);
+}
+
+.ai-content {
+  font-size: 28rpx;
+  line-height: 1.6;
+  color: #555;
+  text-align: justify;
+}

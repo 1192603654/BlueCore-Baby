@@ -22,8 +22,11 @@
     <!-- 喂养卡片 -->
     <view class="card status-card feed-card" bindtap="recordFeed">
       <view class="card-header">
-        <text class="title">喂养 🍼</text>
-        <text class="time">{{lastFeed.time || '暂无记录'}}</text>
+        <view class="title-wrap">
+            <text class="title">喂养 🍼</text>
+            <text class="time">{{lastFeed.time || '暂无记录'}}</text>
+        </view>
+        <text class="view-all" catchtap="goToHistory" data-type="feed">记录 ></text>
       </view>
       <view class="card-body">
         <text class="value">{{lastFeed.value !== null && lastFeed.value !== undefined ? lastFeed.value + ' ' + lastFeed.unit : '点击记录'}}</text>
@@ -34,8 +37,11 @@
     <!-- 尿布卡片 -->
     <view class="card status-card diaper-card" bindtap="recordDiaper">
       <view class="card-header">
-        <text class="title">尿布 🧻</text>
-        <text class="time">{{lastDiaper.time || '暂无记录'}}</text>
+        <view class="title-wrap">
+            <text class="title">尿布 🧻</text>
+            <text class="time">{{lastDiaper.time || '暂无记录'}}</text>
+        </view>
+        <text class="view-all" catchtap="goToHistory" data-type="diaper">记录 ></text>
       </view>
       <view class="card-body">
         <text class="value">{{lastDiaper.sub_type ? lastDiaper.sub_type : '点击记录'}}</text>
@@ -45,13 +51,35 @@
     <!-- 睡眠卡片 -->
     <view class="card status-card sleep-card" bindtap="recordSleep">
       <view class="card-header">
-        <text class="title">睡眠 🌙</text>
-        <text class="time">{{lastSleep.time || '暂无记录'}}</text>
+        <view class="title-wrap">
+            <text class="title">睡眠 🌙</text>
+            <text class="time">{{lastSleep.time || '暂无记录'}}</text>
+        </view>
+        <text class="view-all" catchtap="goToHistory" data-type="sleep">记录 ></text>
       </view>
       <view class="card-body">
         <text class="value">{{lastSleep.duration ? lastSleep.duration : '点击记录'}}</text>
       </view>
     </view>
+
+    <!-- 疫苗卡片 -->
+    <view class="card status-card vaccine-card" bindtap="recordVaccine">
+      <view class="card-header">
+        <view class="title-wrap">
+            <text class="title">疫苗 💉</text>
+            <text class="time">{{lastVaccine.date || '暂无记录'}}</text>
+        </view>
+        <text class="view-all" catchtap="goToHistory" data-type="vaccine">记录 ></text>
+      </view>
+      <view class="card-body">
+        <text class="value">{{lastVaccine.sub_type ? lastVaccine.sub_type : '点击记录'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 右下角悬浮统计按钮 -->
+  <view class="fab-btn" bindtap="goToStats">
+    <text>📊 统计</text>
   </view>
 
   <!-- 底部：预留 ad 广告组件位 -->

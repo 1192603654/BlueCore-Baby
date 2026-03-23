@@ -1,6 +1,8 @@
 {
   "pages": [
-    "pages/index/index"
+    "pages/index/index",
+    "pages/history/history",
+    "pages/stats/stats"
   ],
   "window": {
     "navigationBarBackgroundColor": "#F8F5F2",

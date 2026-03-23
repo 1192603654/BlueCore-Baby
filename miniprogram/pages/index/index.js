@@ -212,5 +212,18 @@ Page({
           wx.showToast({ title: '记录成功' });
           this.loadRecentRecords();
       });
+  },
+
+  goToHistory: function (e) {
+      const type = e.currentTarget.dataset.type;
+      wx.navigateTo({
+          url: `/pages/history/history?type=${type}`
+      });
+  },
+
+  goToStats: function () {
+      wx.navigateTo({
+          url: '/pages/stats/stats'
+      });
   }
 });

@@ -92,6 +92,17 @@
   margin-bottom: 20rpx;
 }
 
+.title-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.view-all {
+  font-size: 24rpx;
+  color: #888;
+  padding: 10rpx;
+}
+
 .title {
   font-size: 32rpx;
   font-weight: 600;
@@ -100,6 +111,34 @@
 .time {
   font-size: 24rpx;
   color: #888;
+  margin-left: 20rpx;
+}
+
+/* 右下角悬浮统计按钮 */
+.fab-btn {
+  position: fixed;
+  right: 40rpx;
+  bottom: 80rpx;
+  background-color: var(--brand-blue);
+  color: white;
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 70rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 20rpx rgba(167, 199, 231, 0.6);
+  z-index: 100;
+  transition: transform 0.2s;
+}
+
+.fab-btn:active {
+  transform: scale(0.9);
+}
+
+.fab-btn text {
+  font-size: 28rpx;
+  font-weight: 600;
 }
 
 .card-body {

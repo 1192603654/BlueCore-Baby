@@ -56,6 +56,14 @@ class RecentRecordsResponse(BaseModel):
     feed: Optional[Record] = None
     diaper: Optional[Record] = None
     sleep: Optional[Record] = None
+    vaccine: Optional[Record] = None
+
+# 每日统计的响应模型
+class DailyStatsResponse(BaseModel):
+    total_feed_ml: float = 0.0
+    total_feed_times: int = 0
+    total_diaper_times: int = 0
+    ai_suggestion: str
 
 # 广告/配置相关模型
 class AdConfigResponse(BaseModel):
