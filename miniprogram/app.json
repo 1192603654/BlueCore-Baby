@@ -1,0 +1,13 @@
+{
+  "pages": [
+    "pages/index/index"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#F8F5F2",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "BlueCore Baby",
+    "backgroundColor": "#F8F5F2",
+    "backgroundTextStyle": "light"
+  },
+  "sitemapLocation": "sitemap.json"
+}

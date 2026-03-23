@@ -1,0 +1,64 @@
+<view class="container">
+  <!-- Top: Scrolling Baby Avatars -->
+  <scroll-view scroll-x class="baby-scroll" enable-flex>
+    <view class="baby-list">
+      <view class="baby-item {{item.id === currentBabyId ? 'active' : ''}}"
+            wx:for="{{babies}}"
+            wx:key="id"
+            bindtap="switchBaby"
+            data-id="{{item.id}}">
+        <image class="avatar" src="{{item.avatar || '/images/default_baby.png'}}" mode="aspectFill"></image>
+        <text class="name">{{item.name}}</text>
+      </view>
+      <view class="baby-item add-baby" bindtap="addBaby">
+        <view class="avatar-placeholder">+</view>
+        <text class="name">添加宝宝</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- Middle: Recent Status Cards -->
+  <view class="status-section">
+    <!-- Feed Card -->
+    <view class="card status-card" bindtap="recordFeed">
+      <view class="card-header">
+        <text class="title">喂养</text>
+        <text class="time">{{lastFeed.time || '暂无记录'}}</text>
+      </view>
+      <view class="card-body">
+        <text class="value">{{lastFeed.value ? lastFeed.value + ' ' + lastFeed.unit : '点击记录'}}</text>
+        <text class="sub-type">{{lastFeed.sub_type || ''}}</text>
+      </view>
+    </view>
+
+    <!-- Diaper Card -->
+    <view class="card status-card" bindtap="recordDiaper">
+      <view class="card-header">
+        <text class="title">尿布</text>
+        <text class="time">{{lastDiaper.time || '暂无记录'}}</text>
+      </view>
+      <view class="card-body">
+        <text class="value">{{lastDiaper.sub_type ? lastDiaper.sub_type : '点击记录'}}</text>
+      </view>
+    </view>
+
+    <!-- Sleep Card -->
+    <view class="card status-card" bindtap="recordSleep">
+      <view class="card-header">
+        <text class="title">睡眠</text>
+        <text class="time">{{lastSleep.time || '暂无记录'}}</text>
+      </view>
+      <view class="card-body">
+        <text class="value">{{lastSleep.duration ? lastSleep.duration : '点击记录'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Bottom: Ad Component Placeholder -->
+  <view class="ad-container" wx:if="{{showAd}}">
+    <!-- Official ad component would go here, mocking it for now -->
+    <view class="mock-ad">
+      <text>广告预留位</text>
+    </view>
+  </view>
+</view>

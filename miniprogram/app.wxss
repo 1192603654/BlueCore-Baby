@@ -1,0 +1,23 @@
+/**app.wxss**/
+page {
+  background-color: #F8F5F2; /* Creamy background */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #333333;
+  --brand-blue: #A7C7E7;
+  --card-radius: 24rpx;
+  box-sizing: border-box;
+}
+
+.container {
+  padding: 30rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.card {
+  background-color: #FFFFFF;
+  border-radius: var(--card-radius);
+  padding: 30rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+  margin-bottom: 30rpx;
+}
