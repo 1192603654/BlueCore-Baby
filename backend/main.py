@@ -39,6 +39,9 @@ def get_current_user_id(authorization: Optional[str] = Header(None)) -> int:
     except Exception:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="无效的 token")
 
+import uuid
+import random
+
 @app.post("/auth/login")
 def login(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     # 模拟微信登录。真实场景下请调用微信 API 用 code 换取 openid。
@@ -46,7 +49,16 @@ def login(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
 
     user = db.query(models.User).filter(models.User.openid == openid).first()
     if not user:
-        user = models.User(openid=openid)
+        # 初次静默登录，生成默认昵称和头像，以降低用户授权门槛
+        random_suffix = "".join(random.choices("0123456789", k=4))
+        default_nickname = f"蓝核家长_{random_suffix}"
+        default_avatar = "/images/default_parent_avatar.png"
+
+        user = models.User(
+            openid=openid,
+            nickname=default_nickname,
+            avatar=default_avatar
+        )
         db.add(user)
         db.commit()
         db.refresh(user)
@@ -55,7 +67,15 @@ def login(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     expiration = datetime.datetime.utcnow() + datetime.timedelta(days=7)
     token = jwt.encode({"user_id": user.id, "exp": expiration}, SECRET_KEY, algorithm=ALGORITHM)
 
-    return {"token": token, "user": {"id": user.id, "openid": user.openid}}
+    return {
+        "token": token,
+        "user": {
+            "id": user.id,
+            "openid": user.openid,
+            "nickname": user.nickname,
+            "avatar": user.avatar
+        }
+    }
 
 @app.get("/babies", response_model=List[schemas.Baby])
 def get_babies(user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
