@@ -8,6 +8,8 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     openid = Column(String, unique=True, index=True, nullable=False) # 微信 OpenID
+    nickname = Column(String, nullable=True) # 随机生成的默认家长昵称
+    avatar = Column(String, nullable=True) # 默认的家长头像
     created_at = Column(DateTime, default=datetime.utcnow)
 
     babies = relationship("Baby", back_populates="parent")

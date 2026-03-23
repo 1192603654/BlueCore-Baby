@@ -4,7 +4,8 @@ from datetime import datetime
 
 # 用户相关模型
 class UserBase(BaseModel):
-    pass
+    nickname: Optional[str] = None
+    avatar: Optional[str] = None
 
 class UserCreate(UserBase):
     code: str  # 微信登录用的 code
