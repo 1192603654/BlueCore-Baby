@@ -1,23 +1,22 @@
-from pydantic import BaseModel
-from typing import Optional, List
+from pydantic import BaseModel, ConfigDict
+from typing import Optional, List, Dict
 from datetime import datetime
 
-# Models for User
+# 用户相关模型
 class UserBase(BaseModel):
     pass
 
 class UserCreate(UserBase):
-    code: str  # WeChat login code
+    code: str  # 微信登录用的 code
 
 class User(UserBase):
     id: int
     openid: str
     created_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
-# Models for Baby
+# 宝宝相关模型
 class BabyBase(BaseModel):
     name: str
     avatar: Optional[str] = None
@@ -30,10 +29,9 @@ class Baby(BabyBase):
     parent_id: int
     created_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
-# Models for Record
+# 记录相关模型
 class RecordBase(BaseModel):
     baby_id: int
     type: str
@@ -50,10 +48,15 @@ class RecordCreate(RecordBase):
 class Record(RecordBase):
     id: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
-# Models for Config/Ads
+# 最新记录的响应模型
+class RecentRecordsResponse(BaseModel):
+    feed: Optional[Record] = None
+    diaper: Optional[Record] = None
+    sleep: Optional[Record] = None
+
+# 广告/配置相关模型
 class AdConfigResponse(BaseModel):
     show_ads: bool
     interstitial_ad_id: Optional[str] = None

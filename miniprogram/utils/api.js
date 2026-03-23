@@ -1,4 +1,4 @@
-const BASE_URL = 'http://127.0.0.1:8000'; // Default to local for testing
+const BASE_URL = 'http://127.0.0.1:8000'; // 默认本地开发测试地址
 
 const request = (method, endpoint, data = {}) => {
   return new Promise((resolve, reject) => {
@@ -6,12 +6,12 @@ const request = (method, endpoint, data = {}) => {
     try {
       token = wx.getStorageSync('token');
     } catch (e) {
-      console.log('Error getting token', e);
+      console.log('获取 token 失败', e);
     }
 
-    // Polyfill for environment without wx object (e.g. testing)
+    // Polyfill 适配无 wx 对象环境（例如测试脚本）
     if (typeof wx === 'undefined') {
-      console.log(`Mock request to ${BASE_URL}${endpoint}`);
+      console.log(`Mock请求发起至 ${BASE_URL}${endpoint}`);
       resolve({ status: "mocked" });
       return;
     }
@@ -28,8 +28,8 @@ const request = (method, endpoint, data = {}) => {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve(res.data);
         } else if (res.statusCode === 401) {
-            // Handle unauthorized, maybe re-login
-            console.error('Unauthorized access');
+            // 处理未授权，可能需要重新登录
+            console.error('访问未授权 (Unauthorized)');
             reject(res);
         } else {
           reject(res);
