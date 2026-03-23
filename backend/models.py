@@ -7,7 +7,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    openid = Column(String, unique=True, index=True, nullable=False) # WeChat OpenID
+    openid = Column(String, unique=True, index=True, nullable=False) # 微信 OpenID
     created_at = Column(DateTime, default=datetime.utcnow)
 
     babies = relationship("Baby", back_populates="parent")
@@ -18,7 +18,7 @@ class Baby(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True, nullable=False)
-    avatar = Column(String, nullable=True) # Avatar URL
+    avatar = Column(String, nullable=True) # 头像 URL
     parent_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -31,10 +31,10 @@ class Record(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     baby_id = Column(Integer, ForeignKey("babies.id"))
-    type = Column(String, index=True, nullable=False) # feed, diaper, sleep, growth
-    sub_type = Column(String, nullable=True) # e.g. bottle, breast, wet, dirty
-    value = Column(Float, nullable=True) # e.g. amount of milk
-    unit = Column(String, nullable=True) # e.g. ml, oz
+    type = Column(String, index=True, nullable=False) # feed (喂养), diaper (尿布), sleep (睡眠), growth (生长)
+    sub_type = Column(String, nullable=True) # 例如：bottle (瓶喂), breast (亲喂), wet (尿湿), dirty (便便)
+    value = Column(Float, nullable=True) # 例如：奶量
+    unit = Column(String, nullable=True) # 例如：ml, oz
     start_time = Column(DateTime, default=datetime.utcnow)
     end_time = Column(DateTime, nullable=True)
     note = Column(Text, nullable=True)

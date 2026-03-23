@@ -1,10 +1,15 @@
 /**app.wxss**/
 page {
-  background-color: #F8F5F2; /* Creamy background */
+  background-color: #F8F5F2; /* 奶油背景色 */
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  color: #333333;
-  --brand-blue: #A7C7E7;
-  --card-radius: 24rpx;
+  color: #333333; /* 基础文本颜色 */
+
+  /* 莫兰迪品牌色系变量 */
+  --brand-blue: #A7C7E7;    /* 品牌蓝 - 喂养 */
+  --brand-pink: #F5CAC3;    /* 柔粉色 - 睡眠 */
+  --brand-yellow: #F7D794;  /* 柔黄色 - 尿布 */
+  --card-radius: 24rpx;     /* 大圆角卡片流 */
+
   box-sizing: border-box;
 }
 
@@ -18,6 +23,11 @@ page {
   background-color: #FFFFFF;
   border-radius: var(--card-radius);
   padding: 30rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8rpx 24rpx rgba(167, 199, 231, 0.15); /* 使用品牌蓝的透明阴影，更柔和 */
   margin-bottom: 30rpx;
+  transition: transform 0.2s ease;
+}
+
+.card:active {
+  transform: scale(0.98); /* 点击反馈 */
 }

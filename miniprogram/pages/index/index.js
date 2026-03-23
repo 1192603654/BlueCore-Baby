@@ -21,7 +21,7 @@ Page({
       });
       this.loadRecentRecords();
     } else {
-      // Wait for app to finish loading babies
+      // 等待 app.js 完成宝宝加载
       app.babiesReadyCallback = babies => {
         this.setData({
           babies: babies,
@@ -31,7 +31,7 @@ Page({
       };
     }
 
-    // Check if ads should be shown
+    // 检查是否应该展示广告
     adManager.getAdConfig().then(config => {
       this.setData({ showAd: config.show_ads });
     });
@@ -45,15 +45,23 @@ Page({
   },
 
   addBaby: function () {
-    // Navigate to add baby page, mocking creation for now
+    // 跳转到添加宝宝页面，这里使用模态框模拟创建流程
     wx.showModal({
-      title: 'Mock Create Baby',
-      content: 'Creating a test baby',
+      title: '模拟创建宝宝',
+      content: '正在创建一个测试宝宝',
       success: (res) => {
         if (res.confirm) {
-          api.post('/babies', { name: "Test Baby" }).then(baby => {
-            app.loadBabies(); // Reload babies
-            wx.showToast({ title: 'Baby Added' });
+          api.post('/babies', { name: "测试宝宝" }).then(baby => {
+            // 设置回调以更新当前页面的宝宝列表
+            app.babiesReadyCallback = babies => {
+              this.setData({
+                babies: babies,
+                currentBabyId: app.globalData.currentBabyId
+              });
+              this.loadRecentRecords();
+            };
+            app.loadBabies(); // 重新加载宝宝
+            wx.showToast({ title: '宝宝已添加' });
           });
         }
       }
@@ -61,8 +69,8 @@ Page({
   },
 
   loadRecentRecords: function () {
-    // In a real app, fetch records for currentBabyId
-    // Mocking recent records
+    // 真实应用中应根据 currentBabyId 从后端获取记录
+    // 这里使用模拟数据展示最近状态
     this.setData({
       lastFeed: { time: '10:30', value: 120, unit: 'ml', sub_type: '母乳' },
       lastDiaper: { time: '09:15', sub_type: '嘘嘘' },
@@ -73,10 +81,11 @@ Page({
   recordFeed: function () {
     const babyId = this.data.currentBabyId;
     if (!babyId) {
-      wx.showToast({ title: 'Please select a baby first', icon: 'none' });
+      wx.showToast({ title: '请先选择或添加一个宝宝', icon: 'none' });
       return;
     }
 
+    // 调用广告策略
     adManager.checkAndShowInterstitial();
 
     api.post('/records', {
@@ -86,18 +95,18 @@ Page({
       value: 100,
       unit: 'ml'
     }).then(record => {
-      wx.showToast({ title: 'Recorded' });
+      wx.showToast({ title: '记录成功' });
       this.loadRecentRecords();
     });
   },
 
   recordDiaper: function () {
-      // Placeholder for diaper recording
-      wx.showToast({ title: 'Record Diaper clicked', icon: 'none' });
+      // 记录尿布操作的预留方法
+      wx.showToast({ title: '点击了记录尿布', icon: 'none' });
   },
 
   recordSleep: function () {
-      // Placeholder for sleep recording
-      wx.showToast({ title: 'Record Sleep clicked', icon: 'none' });
+      // 记录睡眠操作的预留方法
+      wx.showToast({ title: '点击了记录睡眠', icon: 'none' });
   }
 });

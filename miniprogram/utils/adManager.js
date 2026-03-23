@@ -22,7 +22,7 @@ class AdManager {
         return config;
       })
       .catch(err => {
-        console.error("Failed to load ad config", err);
+        console.error("加载广告配置失败", err);
         return { show_ads: false };
       });
   }
@@ -41,16 +41,16 @@ class AdManager {
       this.interstitialAd = wx.createInterstitialAd({
         adUnitId: this.config.interstitial_ad_id
       });
-      this.interstitialAd.onLoad(() => console.log('Interstitial Ad loaded.'));
-      this.interstitialAd.onError(err => console.error('Interstitial Ad error', err));
+      this.interstitialAd.onLoad(() => console.log('插屏广告已加载'));
+      this.interstitialAd.onError(err => console.error('插屏广告错误', err));
     }
 
     if (this.config.rewarded_video_ad_id) {
       this.rewardedVideoAd = wx.createRewardedVideoAd({
         adUnitId: this.config.rewarded_video_ad_id
       });
-      this.rewardedVideoAd.onLoad(() => console.log('Rewarded Video Ad loaded.'));
-      this.rewardedVideoAd.onError(err => console.error('Rewarded Video Ad error', err));
+      this.rewardedVideoAd.onLoad(() => console.log('激励视频广告已加载'));
+      this.rewardedVideoAd.onError(err => console.error('激励视频广告错误', err));
     }
   }
 
@@ -60,35 +60,37 @@ class AdManager {
     this.recordCount++;
     if (this.recordCount >= this.config.interstitial_frequency) {
       this.interstitialAd.show().catch((err) => {
-        console.error("Failed to show interstitial", err);
+        console.error("插屏广告展示失败", err);
       });
-      this.recordCount = 0; // Reset counter
+      this.recordCount = 0; // 重置计数器
     }
   }
 
   showRewardedVideo(onSuccess, onFail) {
       if (!this.config || !this.config.show_ads || !this.rewardedVideoAd) {
-          if (onFail) onFail('Ads not available');
+          if (onFail) onFail('广告不可用');
           return;
       }
 
       this.rewardedVideoAd.show().catch(() => {
-          // Retry loading if failed
+          // 失败后尝试重新加载
           this.rewardedVideoAd.load()
               .then(() => this.rewardedVideoAd.show())
               .catch(err => {
-                  console.log('Reward video load failed', err);
+                  console.log('激励视频加载失败', err);
                   if (onFail) onFail(err);
               });
       });
 
       this.rewardedVideoAd.onClose(res => {
           if (res && res.isEnded) {
+              // 视频完整播放结束，发放奖励
               if (onSuccess) onSuccess();
           } else {
-              if (onFail) onFail('User closed video before completion');
+              // 视频中途关闭
+              if (onFail) onFail('用户提前关闭了视频');
           }
-          // Remove listener to avoid multiple triggers
+          // 移除监听以避免多次触发
           this.rewardedVideoAd.offClose();
       });
   }

@@ -3,15 +3,15 @@ import api from './utils/api.js';
 
 App({
   onLaunch: function () {
-    // Check local storage for token
+    // 检查本地缓存中的 token
     const token = wx.getStorageSync('token');
 
-    // Initialize Ad Manager
+    // 初始化广告管理器
     adManager.init();
 
     if (token) {
       this.globalData.token = token;
-      // Load user's babies
+      // 加载用户的宝宝列表
       this.loadBabies();
     } else {
       this.login();
@@ -21,7 +21,7 @@ App({
   login: function () {
     wx.login({
       success: res => {
-        // Send res.code to backend to get token
+        // 发送 res.code 到后端换取 token
         api.post('/auth/login', { code: res.code })
           .then(data => {
             wx.setStorageSync('token', data.token);
@@ -29,7 +29,7 @@ App({
             this.loadBabies();
           })
           .catch(err => {
-            console.error("Login failed", err);
+            console.error("登录失败", err);
           });
       }
     });
@@ -40,21 +40,21 @@ App({
       .then(babies => {
         this.globalData.babies = babies;
 
-        // Ensure a current baby is selected if babies exist
+        // 如果有宝宝，确保选中当前宝宝
         if (babies.length > 0 && !this.globalData.currentBabyId) {
             this.globalData.currentBabyId = babies[0].id;
         } else if (babies.length === 0) {
-            // Need to create a baby first for the flow. Mocking it here for test flow if empty.
-            console.log("No babies found, should redirect to create baby page in real app.");
+            // 需要先创建一个宝宝以跑通流程。由于是测试，这里仅做日志记录。
+            console.log("未找到宝宝，在真实应用中应跳转至创建宝宝页面。");
         }
 
-        // Notify pages that babies are loaded
+        // 通知页面宝宝列表已加载完毕
         if (this.babiesReadyCallback) {
           this.babiesReadyCallback(babies);
         }
       })
       .catch(err => {
-        console.error("Failed to load babies", err);
+        console.error("获取宝宝列表失败", err);
       });
   },
 

@@ -1,4 +1,4 @@
-/* Top Baby Scroll */
+/* 顶部宝宝滚动栏 */
 .baby-scroll {
   width: 100%;
   white-space: nowrap;
@@ -48,9 +48,10 @@
   margin-top: 10rpx;
   font-size: 24rpx;
   font-weight: 500;
+  color: #555;
 }
 
-/* Status Section */
+/* 状态卡片区域 */
 .status-section {
   display: flex;
   flex-direction: column;
@@ -61,7 +62,28 @@
   display: flex;
   flex-direction: column;
   padding: 40rpx;
+  color: #333;
 }
+
+/* 颜色分类卡片样式 */
+.feed-card {
+  background-color: #F0F8FF; /* 淡淡的蓝底 */
+  border-left: 8rpx solid var(--brand-blue);
+}
+.feed-card .value { color: var(--brand-blue); }
+
+.diaper-card {
+  background-color: #FFFDF5; /* 淡淡的黄底 */
+  border-left: 8rpx solid var(--brand-yellow);
+}
+.diaper-card .value { color: #D4A346; } /* 深一点的黄色适配文字 */
+
+.sleep-card {
+  background-color: #FFF5F7; /* 淡淡的粉底 */
+  border-left: 8rpx solid var(--brand-pink);
+}
+.sleep-card .value { color: #D68D84; } /* 深一点的粉色适配文字 */
+
 
 .card-header {
   display: flex;
@@ -73,24 +95,22 @@
 .title {
   font-size: 32rpx;
   font-weight: 600;
-  color: #333;
 }
 
 .time {
   font-size: 24rpx;
-  color: #999;
+  color: #888;
 }
 
 .card-body {
   display: flex;
   align-items: baseline;
-  gap: 10rpx;
+  gap: 15rpx;
 }
 
 .value {
   font-size: 48rpx;
   font-weight: bold;
-  color: var(--brand-blue);
 }
 
 .sub-type {
@@ -98,10 +118,10 @@
   color: #666;
 }
 
-/* Ad Container */
+/* 广告预留区域 */
 .ad-container {
-  margin-top: auto;
-  padding-top: 40rpx;
+  margin-top: 40rpx;
+  padding-top: 20rpx;
 }
 
 .mock-ad {
@@ -113,4 +133,5 @@
   align-items: center;
   justify-content: center;
   color: #999;
+  font-size: 28rpx;
 }

@@ -2,12 +2,12 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 
-# Models for User
+# 用户相关模型
 class UserBase(BaseModel):
     pass
 
 class UserCreate(UserBase):
-    code: str  # WeChat login code
+    code: str  # 微信登录用的 code
 
 class User(UserBase):
     id: int
@@ -17,7 +17,7 @@ class User(UserBase):
     class Config:
         orm_mode = True
 
-# Models for Baby
+# 宝宝相关模型
 class BabyBase(BaseModel):
     name: str
     avatar: Optional[str] = None
@@ -33,7 +33,7 @@ class Baby(BabyBase):
     class Config:
         orm_mode = True
 
-# Models for Record
+# 记录相关模型
 class RecordBase(BaseModel):
     baby_id: int
     type: str
@@ -53,7 +53,7 @@ class Record(RecordBase):
     class Config:
         orm_mode = True
 
-# Models for Config/Ads
+# 广告/配置相关模型
 class AdConfigResponse(BaseModel):
     show_ads: bool
     interstitial_ad_id: Optional[str] = None
