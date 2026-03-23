@@ -89,6 +89,24 @@ def create_record(record_in: schemas.RecordCreate, user_id: int = Depends(get_cu
 
     return db_record
 
+@app.get("/records/recent/{baby_id}", response_model=schemas.RecentRecordsResponse)
+def get_recent_records(baby_id: int, user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    # 验证该宝宝是否属于当前用户
+    baby = db.query(models.Baby).filter(models.Baby.id == baby_id, models.Baby.parent_id == user_id).first()
+    if not baby:
+        raise HTTPException(status_code=404, detail="未找到宝宝或用户无权限")
+
+    # 获取每种类型的最新一条记录
+    latest_feed = db.query(models.Record).filter(models.Record.baby_id == baby_id, models.Record.type == "feed").order_by(models.Record.start_time.desc()).first()
+    latest_diaper = db.query(models.Record).filter(models.Record.baby_id == baby_id, models.Record.type == "diaper").order_by(models.Record.start_time.desc()).first()
+    latest_sleep = db.query(models.Record).filter(models.Record.baby_id == baby_id, models.Record.type == "sleep").order_by(models.Record.start_time.desc()).first()
+
+    return schemas.RecentRecordsResponse(
+        feed=latest_feed,
+        diaper=latest_diaper,
+        sleep=latest_sleep
+    )
+
 @app.get("/config/ads", response_model=schemas.AdConfigResponse)
 def get_ad_config():
     # 返回模拟的广告配置

@@ -45,13 +45,15 @@ Page({
   },
 
   addBaby: function () {
-    // 跳转到添加宝宝页面，这里使用模态框模拟创建流程
+    // 使用带输入框的模态框让用户输入宝宝名称
     wx.showModal({
-      title: '模拟创建宝宝',
-      content: '正在创建一个测试宝宝',
+      title: '添加宝宝',
+      content: '',
+      editable: true,
+      placeholderText: '请输入宝宝名字',
       success: (res) => {
-        if (res.confirm) {
-          api.post('/babies', { name: "测试宝宝" }).then(baby => {
+        if (res.confirm && res.content) {
+          api.post('/babies', { name: res.content }).then(baby => {
             // 设置回调以更新当前页面的宝宝列表
             app.babiesReadyCallback = babies => {
               this.setData({
@@ -63,18 +65,44 @@ Page({
             app.loadBabies(); // 重新加载宝宝
             wx.showToast({ title: '宝宝已添加' });
           });
+        } else if (res.confirm && !res.content) {
+            wx.showToast({ title: '名字不能为空', icon: 'none' });
         }
       }
     });
   },
 
+  formatTime(dateString) {
+      if (!dateString) return null;
+      // 附加 'Z' 表示该时间是 UTC，确保设备浏览器正确转换至本地时区
+      const utcString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
+      const date = new Date(utcString);
+      return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+  },
+
   loadRecentRecords: function () {
-    // 真实应用中应根据 currentBabyId 从后端获取记录
-    // 这里使用模拟数据展示最近状态
-    this.setData({
-      lastFeed: { time: '10:30', value: 120, unit: 'ml', sub_type: '母乳' },
-      lastDiaper: { time: '09:15', sub_type: '嘘嘘' },
-      lastSleep: { time: '08:00', duration: '2小时30分' }
+    const babyId = this.data.currentBabyId;
+    if (!babyId) return;
+
+    api.get(`/records/recent/${babyId}`).then(records => {
+      this.setData({
+        lastFeed: {
+            time: records.feed ? this.formatTime(records.feed.start_time) : null,
+            value: records.feed ? records.feed.value : null,
+            unit: records.feed ? records.feed.unit : null,
+            sub_type: records.feed ? records.feed.sub_type : null
+        },
+        lastDiaper: {
+            time: records.diaper ? this.formatTime(records.diaper.start_time) : null,
+            sub_type: records.diaper ? records.diaper.sub_type : null
+        },
+        lastSleep: {
+            time: records.sleep ? this.formatTime(records.sleep.start_time) : null,
+            duration: records.sleep ? '已睡着' : null
+        }
+      });
+    }).catch(err => {
+        console.error("加载记录失败", err);
     });
   },
 
@@ -85,18 +113,40 @@ Page({
       return;
     }
 
-    // 调用广告策略
-    adManager.checkAndShowInterstitial();
+    // 提供快捷选择菜单，提高交互体验
+    wx.showActionSheet({
+      itemList: ['亲喂', '瓶喂 90ml', '瓶喂 120ml', '瓶喂 150ml'],
+      success: (res) => {
+        let subType = 'bottle';
+        let value = 0;
+        let unit = 'ml';
 
-    api.post('/records', {
-      baby_id: babyId,
-      type: 'feed',
-      sub_type: 'bottle',
-      value: 100,
-      unit: 'ml'
-    }).then(record => {
-      wx.showToast({ title: '记录成功' });
-      this.loadRecentRecords();
+        if (res.tapIndex === 0) {
+            subType = 'breast';
+            value = 0;
+            unit = '分钟'; // 这里简化，实际情况可能需要秒表
+        } else if (res.tapIndex === 1) {
+            value = 90;
+        } else if (res.tapIndex === 2) {
+            value = 120;
+        } else if (res.tapIndex === 3) {
+            value = 150;
+        }
+
+        // 调用广告策略
+        adManager.checkAndShowInterstitial();
+
+        api.post('/records', {
+          baby_id: babyId,
+          type: 'feed',
+          sub_type: subType === 'breast' ? '亲喂' : '瓶喂',
+          value: value,
+          unit: unit
+        }).then(record => {
+          wx.showToast({ title: '记录成功' });
+          this.loadRecentRecords();
+        });
+      }
     });
   },
 

@@ -26,7 +26,7 @@
         <text class="time">{{lastFeed.time || '暂无记录'}}</text>
       </view>
       <view class="card-body">
-        <text class="value">{{lastFeed.value ? lastFeed.value + ' ' + lastFeed.unit : '点击记录'}}</text>
+        <text class="value">{{lastFeed.value !== null && lastFeed.value !== undefined ? lastFeed.value + ' ' + lastFeed.unit : '点击记录'}}</text>
         <text class="sub-type">{{lastFeed.sub_type || ''}}</text>
       </view>
     </view>
