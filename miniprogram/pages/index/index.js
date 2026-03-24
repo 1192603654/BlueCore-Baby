@@ -88,6 +88,24 @@ Page({
       return `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   },
 
+  timeAgo(dateString) {
+      if (!dateString) return '暂无记录';
+      const utcString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
+      const date = new Date(utcString);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMins / 60);
+
+      if (diffMins < 60) {
+          return `${diffMins || 1}分钟前`;
+      } else if (diffHours < 24) {
+          return `${diffHours}小时前`;
+      } else {
+          return `${Math.floor(diffHours / 24)}天前`;
+      }
+  },
+
   loadRecentRecords: function () {
     const babyId = this.data.currentBabyId;
     if (!babyId) return;
@@ -95,20 +113,21 @@ Page({
     api.get(`/records/recent/${babyId}`).then(records => {
       this.setData({
         lastFeed: {
-            time: records.feed ? this.formatTime(records.feed.start_time) : null,
+            timeAgo: records.feed ? this.timeAgo(records.feed.start_time) : '暂无记录',
             value: records.feed ? records.feed.value : null,
             unit: records.feed ? records.feed.unit : null,
             sub_type: records.feed ? records.feed.sub_type : null
         },
         lastDiaper: {
-            time: records.diaper ? this.formatTime(records.diaper.start_time) : null,
+            timeAgo: records.diaper ? this.timeAgo(records.diaper.start_time) : '暂无记录',
             sub_type: records.diaper ? records.diaper.sub_type : null
         },
         lastSleep: {
-            time: records.sleep ? this.formatTime(records.sleep.start_time) : null,
+            timeAgo: records.sleep ? this.timeAgo(records.sleep.start_time) : '暂无记录',
             duration: records.sleep ? '已睡着' : null
         },
         lastVaccine: {
+            timeAgo: records.vaccine ? this.timeAgo(records.vaccine.start_time) : '暂无记录',
             date: records.vaccine ? this.formatDate(records.vaccine.start_time) : null,
             sub_type: records.vaccine ? records.vaccine.sub_type : null
         }

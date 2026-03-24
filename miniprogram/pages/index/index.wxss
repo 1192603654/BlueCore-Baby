@@ -1,13 +1,57 @@
+/* 页面基础与顶部 Header */
+.page-bg {
+  background-color: #F8F5F2; /* 奶油背景色 */
+  min-height: 100vh;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 40rpx;
+  padding-top: 20rpx;
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.main-title {
+  font-size: 48rpx;
+  font-weight: 800;
+  color: #1A2F4C; /* 深蓝黑色字 */
+  margin-bottom: 8rpx;
+}
+
+.sub-title {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.settings-icon {
+  width: 70rpx;
+  height: 70rpx;
+  background-color: #FFF;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  font-size: 32rpx;
+}
+
 /* 顶部宝宝滚动栏 */
 .baby-scroll {
   width: 100%;
   white-space: nowrap;
-  margin-bottom: 40rpx;
+  margin-bottom: 50rpx;
 }
 
 .baby-list {
   display: flex;
   padding: 10rpx 0;
+  align-items: center;
 }
 
 .baby-item {
@@ -21,141 +65,132 @@
 
 .baby-item.active {
   opacity: 1;
-  transform: scale(1.1);
 }
 
-.avatar, .avatar-placeholder {
-  width: 120rpx;
-  height: 120rpx;
+.avatar-ring {
+  width: 130rpx;
+  height: 130rpx;
   border-radius: 50%;
   border: 4rpx solid transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12rpx;
 }
 
-.baby-item.active .avatar {
-  border-color: var(--brand-blue);
+.baby-item.active .avatar-ring {
+  border-color: #8EB2D6; /* 选中状态的外部蓝色环 */
+}
+
+.avatar {
+  width: 116rpx;
+  height: 116rpx;
+  border-radius: 50%;
+  border: 4rpx solid #FFF; /* 内部白边环 */
 }
 
 .avatar-placeholder {
-  background-color: #EAEAEA;
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  border: 4rpx dashed #A7C7E7;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 12rpx;
+  background-color: transparent;
+}
+
+.plus-icon {
   font-size: 60rpx;
-  color: #999;
+  color: #A7C7E7;
+  font-weight: 300;
 }
 
 .name {
-  margin-top: 10rpx;
-  font-size: 24rpx;
+  font-size: 26rpx;
+  color: #666;
   font-weight: 500;
-  color: #555;
+}
+
+.baby-item.active .name {
+  color: #333;
+  font-weight: 600;
 }
 
 /* 状态卡片区域 */
 .status-section {
   display: flex;
   flex-direction: column;
-  gap: 20rpx;
+  gap: 30rpx;
 }
 
 .status-card {
   display: flex;
-  flex-direction: column;
-  padding: 40rpx;
-  color: #333;
-}
-
-/* 颜色分类卡片样式 */
-.feed-card {
-  background-color: #F0F8FF; /* 淡淡的蓝底 */
-  border-left: 8rpx solid var(--brand-blue);
-}
-.feed-card .value { color: var(--brand-blue); }
-
-.diaper-card {
-  background-color: #FFFDF5; /* 淡淡的黄底 */
-  border-left: 8rpx solid var(--brand-yellow);
-}
-.diaper-card .value { color: #D4A346; } /* 深一点的黄色适配文字 */
-
-.sleep-card {
-  background-color: #FFF5F7; /* 淡淡的粉底 */
-  border-left: 8rpx solid var(--brand-pink);
-}
-.sleep-card .value { color: #D68D84; } /* 深一点的粉色适配文字 */
-
-
-.card-header {
-  display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20rpx;
+  background-color: #FFFFFF;
+  border-radius: 36rpx; /* 更大的圆角 */
+  padding: 40rpx;
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.03); /* 极淡的阴影 */
+  border-left: none; /* 移除旧的彩边 */
+  transition: transform 0.2s ease;
 }
 
-.title-wrap {
+.status-card:active {
+  transform: scale(0.98);
+}
+
+.card-left {
   display: flex;
-  align-items: center;
-}
-
-.view-all {
-  font-size: 24rpx;
-  color: #888;
-  padding: 10rpx;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .title {
-  font-size: 32rpx;
-  font-weight: 600;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1A2F4C;
+  margin-bottom: 16rpx;
 }
 
-.time {
+.detail {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+
+.time-ago {
   font-size: 24rpx;
-  color: #888;
-  margin-left: 20rpx;
+  color: #A0A0A0;
 }
 
-/* 右下角悬浮统计按钮 */
-.fab-btn {
-  position: fixed;
-  right: 40rpx;
-  bottom: 80rpx;
-  background-color: var(--brand-blue);
-  color: white;
-  width: 140rpx;
-  height: 140rpx;
-  border-radius: 70rpx;
+/* 右侧图标容器 */
+.card-right {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8rpx 20rpx rgba(167, 199, 231, 0.6);
-  z-index: 100;
-  transition: transform 0.2s;
 }
 
-.fab-btn:active {
-  transform: scale(0.9);
-}
-
-.fab-btn text {
-  font-size: 28rpx;
-  font-weight: 600;
-}
-
-.card-body {
+.icon-box {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 30rpx;
   display: flex;
-  align-items: baseline;
-  gap: 15rpx;
+  align-items: center;
+  justify-content: center;
 }
 
-.value {
-  font-size: 48rpx;
-  font-weight: bold;
+.icon-text {
+  font-size: 44rpx;
 }
 
-.sub-type {
-  font-size: 28rpx;
-  color: #666;
-}
+/* 图标对应的背景色 */
+.icon-feed { background-color: #F0F6FC; }
+.icon-diaper { background-color: #FFF8F0; }
+.icon-sleep { background-color: #F4F4FE; }
+.icon-vaccine { background-color: #F0FAF5; }
 
 /* 广告预留区域 */
 .ad-container {
@@ -167,10 +202,69 @@
   width: 100%;
   height: 200rpx;
   background-color: #E8E8E8;
-  border-radius: var(--card-radius);
+  border-radius: 24rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #999;
   font-size: 28rpx;
+}
+
+/* 底部固定导航栏 */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120rpx;
+  background-color: #FFFFFF;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.03);
+  z-index: 100;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #B0B0B0;
+  position: relative;
+  width: 100rpx;
+}
+
+.nav-item.active {
+  color: #8EB2D6;
+}
+
+.nav-icon {
+  font-size: 40rpx;
+  margin-bottom: 6rpx;
+}
+
+.nav-text {
+  font-size: 20rpx;
+  font-weight: 500;
+}
+
+.nav-plus-btn {
+  width: 80rpx;
+  height: 80rpx;
+  background-color: #8EB2D6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -40rpx; /* 向上凸起 */
+  margin-bottom: 6rpx;
+  box-shadow: 0 8rpx 16rpx rgba(142, 178, 214, 0.4);
+}
+
+.nav-plus-icon {
+  color: #FFFFFF;
+  font-size: 48rpx;
+  font-weight: 300;
 }
