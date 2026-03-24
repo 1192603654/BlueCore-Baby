@@ -13,14 +13,25 @@
 ## 技术栈
 
 *   **前端**：微信小程序原生框架 (WXML/WXSS/JS)
-*   **后端**：Python 3.8+ / FastAPI / SQLAlchemy / Pydantic v2
+*   **后端**：Python 3.8+ / Flask / SQLAlchemy (适配微信云托管)
 *   **数据库**：SQLite（本地快速开发默认） / MySQL（生产环境适用）
 
 ---
 
 ## 🚀 部署与启动教程
 
-本项目分为后端（Python FastAPI）和前端（微信小程序）两部分。请按照以下步骤在本地跑通整个闭环流程：
+本项目分为后端（Python Flask）和前端（微信小程序）两部分。由于微信最新规范限制局域网 IP 调用，**推荐直接使用微信云托管部署后端**，以获得最佳体验和天然鉴权。
+
+### 第一种方式：微信云托管部署 (极力推荐)
+
+1. 打开微信开发者工具，点击右上角的 **“云开发”** -> **“云托管”** 开通服务。
+2. 在云托管控制台，新建一个服务，命名为 `flask-backend`。
+3. 选择 **“代码库拉取”** 或 **“本地代码上传”** 方式，上传本项目的 `backend` 文件夹（根目录下已经为您配置好了标准的 `Dockerfile` 和 `requirements.txt`）。
+4. 发布流水线，等待构建成功。
+5. 在 `miniprogram/utils/api.js` 中，将 `CLOUD_ENV_ID` 替换为您的真实环境 ID。
+6. 前端编译运行，小程序将自动通过安全的微信内网链路 `wx.cloud.callContainer` 访问您的 Flask 服务！
+
+### 第二种方式：后端本地服务调试 (Local Backend)
 
 ### 第一步：后端服务部署 (Backend)
 
@@ -41,24 +52,30 @@
    ```
 
 3. **安装项目依赖模块**：
-   虚拟环境激活后，运行以下命令安装必需的库文件（如 fastapi, uvicorn, sqlalchemy 等）：
+   虚拟环境激活后，运行以下命令安装必需的库文件（Flask, SQLAlchemy, PyJWT 等）：
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **启动本地服务器**：
-   依赖安装完成后，即可启动 FastAPI 服务。建议使用 `python -m` 显式调用，确保 uvicorn 运行在当前安装了项目依赖包的 Python 解释器中，避免由于环境变量导致的 `ModuleNotFoundError`（如找不到 jwt）：
+4. **启动本地 Flask 服务器**：
+   依赖安装完成后，您可以直接运行 `backend/main.py` 以启动 Flask 开发服务：
    ```bash
-   python -m uvicorn backend.main:app --reload
+   python backend/main.py
    ```
-   > 启动成功后，终端会显示类似 `Uvicorn running on http://127.0.0.1:8000` 的字样。
-   > **注意**：本地测试默认使用的是极其轻量的 SQLite 数据库。当您首次启动服务时，系统会自动在根目录下创建一个名为 `bluecore_baby.db` 的文件作为您的数据库，真正做到“开箱即用”！
+   或者使用 Flask 官方推荐的命令：
+   ```bash
+   export FLASK_APP=backend/main.py
+   export FLASK_ENV=development
+   flask run --host=0.0.0.0 --port=8000
+   ```
+   > 启动成功后，终端会显示运行在 `http://127.0.0.1:8000` 的字样。
+   > **注意**：本地测试默认使用的是极其轻量的 SQLite 数据库。系统会在根目录下自动创建 `bluecore_baby.db` 文件。
 
 5. **如何切换到 MySQL (准备上线生产环境时)**：
-   本系统原生支持 MySQL，只需要在启动应用前，配置 `DATABASE_URL` 环境变量即可无缝切换：
+   本系统原生支持 MySQL，配置 `DATABASE_URL` 环境变量即可无缝切换：
    ```bash
    export DATABASE_URL="mysql+pymysql://root:您的密码@127.0.0.1/bluecore_baby"
-   python -m uvicorn backend.main:app --reload
+   python backend/main.py
    ```
 
 ---
@@ -83,9 +100,3 @@
 
 4. **尽情体验**：
    点击工具顶部菜单栏的“编译”，首页将瞬间加载出华丽的莫兰迪色卡片！点击“喂养”或者右下角的“添加”，即可看到数据实时写入了您的本地后端数据库！
-
-## API 文档
-
-在启动后端服务后，您可以直接访问以下地址查看自动生成的交互式 API 文档：
-*   Swagger UI: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-*   ReDoc: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
