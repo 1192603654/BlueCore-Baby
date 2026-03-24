@@ -1,64 +1,128 @@
-<view class="container">
-  <!-- 顶部：横向滚动的宝宝头像切换栏 -->
-  <scroll-view scroll-x class="baby-scroll" enable-flex>
-    <view class="baby-list">
-      <view class="baby-item {{item.id === currentBabyId ? 'active' : ''}}"
-            wx:for="{{babies}}"
-            wx:key="id"
-            bindtap="switchBaby"
-            data-id="{{item.id}}">
-        <image class="avatar" src="{{item.avatar || '/images/default_baby.png'}}" mode="aspectFill"></image>
-        <text class="name">{{item.name}}</text>
+<view class="page-bg">
+  <view class="container">
+    <!-- 顶部 Header -->
+    <view class="header-section">
+      <view class="header-text">
+        <text class="main-title">BlueCore Baby</text>
+        <text class="sub-title">记录宝宝的每一个瞬间</text>
       </view>
-      <view class="baby-item add-baby" bindtap="addBaby">
-        <view class="avatar-placeholder">+</view>
-        <text class="name">添加宝宝</text>
-      </view>
-    </view>
-  </scroll-view>
-
-  <!-- 中部：喂养、尿布、睡眠的“最近状态”大卡片 -->
-  <view class="status-section">
-    <!-- 喂养卡片 -->
-    <view class="card status-card feed-card" bindtap="recordFeed">
-      <view class="card-header">
-        <text class="title">喂养 🍼</text>
-        <text class="time">{{lastFeed.time || '暂无记录'}}</text>
-      </view>
-      <view class="card-body">
-        <text class="value">{{lastFeed.value !== null && lastFeed.value !== undefined ? lastFeed.value + ' ' + lastFeed.unit : '点击记录'}}</text>
-        <text class="sub-type">{{lastFeed.sub_type || ''}}</text>
+      <view class="settings-icon">
+        <text>⚙️</text>
       </view>
     </view>
 
-    <!-- 尿布卡片 -->
-    <view class="card status-card diaper-card" bindtap="recordDiaper">
-      <view class="card-header">
-        <text class="title">尿布 🧻</text>
-        <text class="time">{{lastDiaper.time || '暂无记录'}}</text>
+    <!-- 顶部：横向滚动的宝宝头像切换栏 -->
+    <scroll-view scroll-x class="baby-scroll" enable-flex>
+      <view class="baby-list">
+        <view class="baby-item {{item.id === currentBabyId ? 'active' : ''}}"
+              wx:for="{{babies}}"
+              wx:key="id"
+              bindtap="switchBaby"
+              data-id="{{item.id}}">
+          <view class="avatar-ring">
+            <image class="avatar" src="{{item.avatar || '/images/default_baby.png'}}" mode="aspectFill"></image>
+          </view>
+          <text class="name">{{item.name}}</text>
+        </view>
+        <view class="baby-item add-baby" bindtap="addBaby">
+          <view class="avatar-placeholder">
+            <text class="plus-icon">+</text>
+          </view>
+          <text class="name">添加</text>
+        </view>
       </view>
-      <view class="card-body">
-        <text class="value">{{lastDiaper.sub_type ? lastDiaper.sub_type : '点击记录'}}</text>
+    </scroll-view>
+
+    <!-- 中部：状态大卡片区域 -->
+    <view class="status-section">
+      <!-- 喂养卡片 -->
+      <view class="card status-card" catchtap="goToHistory" data-type="feed">
+        <view class="card-left">
+          <text class="title">喂养</text>
+          <text class="detail" wx:if="{{lastFeed.value}}">最近: {{lastFeed.value}}{{lastFeed.unit}} ({{lastFeed.sub_type}})</text>
+          <text class="detail" wx:else>点击记录</text>
+          <text class="time-ago">{{lastFeed.timeAgo}}</text>
+        </view>
+        <view class="card-right" catchtap="recordFeed">
+          <view class="icon-box icon-feed">
+            <text class="icon-text">🍼</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 尿布卡片 -->
+      <view class="card status-card" catchtap="goToHistory" data-type="diaper">
+        <view class="card-left">
+          <text class="title">尿布</text>
+          <text class="detail" wx:if="{{lastDiaper.sub_type}}">状态: {{lastDiaper.sub_type}}</text>
+          <text class="detail" wx:else>点击记录</text>
+          <text class="time-ago">{{lastDiaper.timeAgo}}</text>
+        </view>
+        <view class="card-right" catchtap="recordDiaper">
+          <view class="icon-box icon-diaper">
+            <text class="icon-text">💧</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 睡眠卡片 -->
+      <view class="card status-card" catchtap="goToHistory" data-type="sleep">
+        <view class="card-left">
+          <text class="title">睡眠</text>
+          <text class="detail" wx:if="{{lastSleep.duration}}">正在睡觉...</text>
+          <text class="detail" wx:else>点击记录</text>
+          <text class="time-ago" wx:if="{{lastSleep.duration}}">已睡 45min</text>
+          <text class="time-ago" wx:else>{{lastSleep.timeAgo}}</text>
+        </view>
+        <view class="card-right" catchtap="recordSleep">
+          <view class="icon-box icon-sleep">
+            <text class="icon-text">🌙</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 疫苗卡片 -->
+      <view class="card status-card" catchtap="goToHistory" data-type="vaccine">
+        <view class="card-left">
+          <text class="title">疫苗</text>
+          <text class="detail" wx:if="{{lastVaccine.sub_type}}">最近: {{lastVaccine.sub_type}}</text>
+          <text class="detail" wx:else>点击记录</text>
+          <text class="time-ago">{{lastVaccine.timeAgo}}</text>
+        </view>
+        <view class="card-right" catchtap="recordVaccine">
+          <view class="icon-box icon-vaccine">
+            <text class="icon-text">💉</text>
+          </view>
+        </view>
       </view>
     </view>
 
-    <!-- 睡眠卡片 -->
-    <view class="card status-card sleep-card" bindtap="recordSleep">
-      <view class="card-header">
-        <text class="title">睡眠 🌙</text>
-        <text class="time">{{lastSleep.time || '暂无记录'}}</text>
-      </view>
-      <view class="card-body">
-        <text class="value">{{lastSleep.duration ? lastSleep.duration : '点击记录'}}</text>
+    <!-- 底部预留广告区域 -->
+    <view class="ad-container" wx:if="{{showAd}}">
+      <view class="mock-ad">
+        <text>广告预留位</text>
       </view>
     </view>
+
+    <!-- 为底部导航栏留出空间 -->
+    <view style="height: 140rpx;"></view>
   </view>
 
-  <!-- 底部：预留 ad 广告组件位 -->
-  <view class="ad-container" wx:if="{{showAd}}">
-    <!-- 这里放置官方广告组件，暂时模拟展示 -->
-    <view class="mock-ad">
-      <text>广告预留位</text>
+  <!-- 底部固定导航栏 -->
+  <view class="bottom-nav">
+    <view class="nav-item active">
+      <text class="nav-icon">👶</text>
+      <text class="nav-text">首页</text>
+    </view>
+    <view class="nav-item" bindtap="goToStats">
+      <text class="nav-icon">🕒</text>
+      <text class="nav-text">记录</text>
+    </view>
+    <view class="nav-item">
+      <view class="nav-plus-btn">
+        <text class="nav-plus-icon">+</text>
+      </view>
+      <text class="nav-text">添加</text>
     </view>
   </view>
 </view>

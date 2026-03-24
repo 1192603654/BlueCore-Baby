@@ -1,0 +1,20 @@
+<view class="container">
+  <view class="header-title">{{title}}记录</view>
+
+  <view class="record-list" wx:if="{{records.length > 0}}">
+    <view class="record-item card {{type}}-card" wx:for="{{records}}" wx:key="id">
+      <view class="time-col">
+        <text class="date">{{item.date}}</text>
+        <text class="time">{{item.time}}</text>
+      </view>
+      <view class="info-col">
+        <text class="value">{{item.value ? item.value + ' ' + (item.unit || '') : item.sub_type}}</text>
+        <text class="sub-type" wx:if="{{item.value}}">{{item.sub_type}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:else>
+    <text>暂无{{title}}记录哦~</text>
+  </view>
+</view>

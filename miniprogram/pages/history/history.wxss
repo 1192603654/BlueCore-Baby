@@ -1,0 +1,86 @@
+.container {
+  padding: 30rpx;
+}
+
+.header-title {
+  font-size: 40rpx;
+  font-weight: 600;
+  margin-bottom: 40rpx;
+  color: #333;
+}
+
+.record-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.record-item {
+  display: flex;
+  align-items: center;
+  padding: 30rpx;
+  margin-bottom: 0; /* 覆盖 card 的 default margin */
+}
+
+/* 延续首页的莫兰迪颜色风格 */
+.feed-card {
+  background-color: #F0F8FF;
+  border-left: 8rpx solid var(--brand-blue);
+}
+.diaper-card {
+  background-color: #FFFDF5;
+  border-left: 8rpx solid var(--brand-yellow);
+}
+.sleep-card {
+  background-color: #FFF5F7;
+  border-left: 8rpx solid var(--brand-pink);
+}
+.vaccine-card {
+  background-color: #F4FCF9;
+  border-left: 8rpx solid var(--brand-green);
+}
+
+.time-col {
+  display: flex;
+  flex-direction: column;
+  width: 150rpx;
+  margin-right: 30rpx;
+}
+
+.date {
+  font-size: 24rpx;
+  color: #888;
+}
+
+.time {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.info-col {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.value {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.sub-type {
+  font-size: 26rpx;
+  color: #666;
+  margin-top: 8rpx;
+}
+
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400rpx;
+  color: #999;
+  font-size: 28rpx;
+}

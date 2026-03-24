@@ -120,11 +120,75 @@ def get_recent_records(baby_id: int, user_id: int = Depends(get_current_user_id)
     latest_feed = db.query(models.Record).filter(models.Record.baby_id == baby_id, models.Record.type == "feed").order_by(models.Record.start_time.desc()).first()
     latest_diaper = db.query(models.Record).filter(models.Record.baby_id == baby_id, models.Record.type == "diaper").order_by(models.Record.start_time.desc()).first()
     latest_sleep = db.query(models.Record).filter(models.Record.baby_id == baby_id, models.Record.type == "sleep").order_by(models.Record.start_time.desc()).first()
+    latest_vaccine = db.query(models.Record).filter(models.Record.baby_id == baby_id, models.Record.type == "vaccine").order_by(models.Record.start_time.desc()).first()
 
     return schemas.RecentRecordsResponse(
         feed=latest_feed,
         diaper=latest_diaper,
-        sleep=latest_sleep
+        sleep=latest_sleep,
+        vaccine=latest_vaccine
+    )
+
+@app.get("/records/list/{baby_id}", response_model=List[schemas.Record])
+def get_records_list(baby_id: int, type: str, user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    # 验证宝宝归属权
+    baby = db.query(models.Baby).filter(models.Baby.id == baby_id, models.Baby.parent_id == user_id).first()
+    if not baby:
+        raise HTTPException(status_code=404, detail="未找到宝宝或用户无权限")
+
+    # 根据类型查询，按时间倒序排列，限制返回最新的 50 条记录
+    records = db.query(models.Record).filter(
+        models.Record.baby_id == baby_id,
+        models.Record.type == type
+    ).order_by(models.Record.start_time.desc()).limit(50).all()
+
+    return records
+
+from sqlalchemy import func
+from datetime import date
+
+@app.get("/stats/daily/{baby_id}", response_model=schemas.DailyStatsResponse)
+def get_daily_stats(baby_id: int, query_date: str = None, user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    # 验证宝宝归属权
+    baby = db.query(models.Baby).filter(models.Baby.id == baby_id, models.Baby.parent_id == user_id).first()
+    if not baby:
+        raise HTTPException(status_code=404, detail="未找到宝宝或用户无权限")
+
+    # 如果没有传 query_date，默认使用今天的日期
+    if not query_date:
+        query_date = date.today().isoformat()
+
+    try:
+        # 转换字符串为日期对象，注意 datetime 是 module
+        target_date = datetime.datetime.strptime(query_date, "%Y-%m-%d").date()
+    except ValueError:
+        raise HTTPException(status_code=400, detail="日期格式错误，请使用 YYYY-MM-DD")
+
+    # 统计当日的喂养记录（针对值为奶量 ml 的情况累加）
+    feed_records = db.query(models.Record).filter(
+        models.Record.baby_id == baby_id,
+        models.Record.type == "feed",
+        func.date(models.Record.start_time) == target_date
+    ).all()
+
+    total_feed_ml = sum((r.value for r in feed_records if r.value and r.unit == "ml"))
+    total_feed_times = len(feed_records)
+
+    # 统计当日的尿布次数
+    diaper_count = db.query(models.Record).filter(
+        models.Record.baby_id == baby_id,
+        models.Record.type == "diaper",
+        func.date(models.Record.start_time) == target_date
+    ).count()
+
+    # 静态的 AI 分析建议（后续可以对接真实的大模型 API）
+    ai_suggestion = "【智能管家建议】宝宝今天喝奶量和排便情况都在正常范围内。如果夜间有偶尔哭闹，可能是进入了猛涨期，建议多陪伴安抚，可以适当增加白天的活动量。请继续保持良好的记录习惯哦！"
+
+    return schemas.DailyStatsResponse(
+        total_feed_ml=total_feed_ml,
+        total_feed_times=total_feed_times,
+        total_diaper_times=diaper_count,
+        ai_suggestion=ai_suggestion
     )
 
 @app.get("/config/ads", response_model=schemas.AdConfigResponse)

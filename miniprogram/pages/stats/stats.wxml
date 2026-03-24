@@ -1,0 +1,44 @@
+<view class="container">
+  <!-- 日期选择器 -->
+  <view class="date-picker-section">
+    <picker mode="date" value="{{selectedDate}}" end="{{todayDate}}" bindchange="onDateChange">
+      <view class="date-display">
+        <text class="calendar-icon">📅</text>
+        <text class="date-text">{{selectedDate}}</text>
+        <text class="arrow">▼</text>
+      </view>
+    </picker>
+  </view>
+
+  <!-- 统计卡片网格 -->
+  <view class="stats-grid">
+    <view class="stat-card feed-stat">
+      <text class="stat-title">总奶量</text>
+      <view class="stat-value-group">
+        <text class="stat-number">{{stats.total_feed_ml}}</text>
+        <text class="stat-unit">ml</text>
+      </view>
+      <text class="stat-sub">共喂养 {{stats.total_feed_times}} 次</text>
+    </view>
+
+    <view class="stat-card diaper-stat">
+      <text class="stat-title">换尿布</text>
+      <view class="stat-value-group">
+        <text class="stat-number">{{stats.total_diaper_times}}</text>
+        <text class="stat-unit">次</text>
+      </view>
+      <text class="stat-sub">保持干爽</text>
+    </view>
+  </view>
+
+  <!-- AI 智能分析卡片 -->
+  <view class="card ai-card">
+    <view class="ai-header">
+      <text class="ai-icon">✨</text>
+      <text class="ai-title">智能管家建议</text>
+    </view>
+    <view class="ai-content">
+      <text>{{stats.ai_suggestion || '暂无分析建议'}}</text>
+    </view>
+  </view>
+</view>
