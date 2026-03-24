@@ -74,8 +74,12 @@ Page({
   },
 
   quickSetAmount(e) {
-    const val = e.currentTarget.dataset.val;
+    const val = String(e.currentTarget.dataset.val); // 强制转为字符串以确保和 WXML 的 == 判断类型一致
     this.setData({ feedAmount: val });
+  },
+
+  stopBubble() {
+    // 阻止事件冒泡的空函数，防止某些特定设备上点击穿透
   },
 
   onDurationInput(e) {

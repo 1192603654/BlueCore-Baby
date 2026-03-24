@@ -33,14 +33,14 @@
       <block wx:if="{{feedType === 'bottle'}}">
         <view class="form-group">
           <view class="form-label">奶量 (ml)</view>
-          <view class="quick-tags">
-            <view class="tag {{feedAmount == 30 ? 'active' : ''}}" bindtap="quickSetAmount" data-val="30">30</view>
-            <view class="tag {{feedAmount == 60 ? 'active' : ''}}" bindtap="quickSetAmount" data-val="60">60</view>
-            <view class="tag {{feedAmount == 90 ? 'active' : ''}}" bindtap="quickSetAmount" data-val="90">90</view>
-            <view class="tag {{feedAmount == 120 ? 'active' : ''}}" bindtap="quickSetAmount" data-val="120">120</view>
-            <view class="tag {{feedAmount == 150 ? 'active' : ''}}" bindtap="quickSetAmount" data-val="150">150</view>
-            <view class="tag {{feedAmount == 180 ? 'active' : ''}}" bindtap="quickSetAmount" data-val="180">180</view>
-            <view class="tag {{feedAmount == 210 ? 'active' : ''}}" bindtap="quickSetAmount" data-val="210">210</view>
+          <view class="quick-tags" catchtap="stopBubble">
+            <view class="tag {{feedAmount == '30' ? 'active' : ''}}" catchtap="quickSetAmount" data-val="30">30</view>
+            <view class="tag {{feedAmount == '60' ? 'active' : ''}}" catchtap="quickSetAmount" data-val="60">60</view>
+            <view class="tag {{feedAmount == '90' ? 'active' : ''}}" catchtap="quickSetAmount" data-val="90">90</view>
+            <view class="tag {{feedAmount == '120' ? 'active' : ''}}" catchtap="quickSetAmount" data-val="120">120</view>
+            <view class="tag {{feedAmount == '150' ? 'active' : ''}}" catchtap="quickSetAmount" data-val="150">150</view>
+            <view class="tag {{feedAmount == '180' ? 'active' : ''}}" catchtap="quickSetAmount" data-val="180">180</view>
+            <view class="tag {{feedAmount == '210' ? 'active' : ''}}" catchtap="quickSetAmount" data-val="210">210</view>
           </view>
           <input class="form-input" type="number" placeholder="手动输入奶量" value="{{feedAmount}}" bindinput="onAmountInput" />
         </view>
@@ -53,11 +53,11 @@
         </view>
         <view class="form-group">
           <view class="form-label">预估奶量 (ml，选填)</view>
-          <view class="quick-tags">
-            <view class="tag {{feedAmount == 30 ? 'active' : ''}}" bindtap="quickSetAmount" data-val="30">30</view>
-            <view class="tag {{feedAmount == 60 ? 'active' : ''}}" bindtap="quickSetAmount" data-val="60">60</view>
-            <view class="tag {{feedAmount == 90 ? 'active' : ''}}" bindtap="quickSetAmount" data-val="90">90</view>
-            <view class="tag {{feedAmount == 120 ? 'active' : ''}}" bindtap="quickSetAmount" data-val="120">120</view>
+          <view class="quick-tags" catchtap="stopBubble">
+            <view class="tag {{feedAmount == '30' ? 'active' : ''}}" catchtap="quickSetAmount" data-val="30">30</view>
+            <view class="tag {{feedAmount == '60' ? 'active' : ''}}" catchtap="quickSetAmount" data-val="60">60</view>
+            <view class="tag {{feedAmount == '90' ? 'active' : ''}}" catchtap="quickSetAmount" data-val="90">90</view>
+            <view class="tag {{feedAmount == '120' ? 'active' : ''}}" catchtap="quickSetAmount" data-val="120">120</view>
           </view>
           <input class="form-input" type="number" placeholder="选填，手动输入预估量" value="{{feedAmount}}" bindinput="onAmountInput" />
         </view>
