@@ -47,9 +47,9 @@
    ```
 
 4. **启动本地服务器**：
-   依赖安装完成后，即可启动 FastAPI 服务：
+   依赖安装完成后，即可启动 FastAPI 服务。建议使用 `python -m` 显式调用，确保 uvicorn 运行在当前安装了项目依赖包的 Python 解释器中，避免由于环境变量导致的 `ModuleNotFoundError`（如找不到 jwt）：
    ```bash
-   uvicorn backend.main:app --reload
+   python -m uvicorn backend.main:app --reload
    ```
    > 启动成功后，终端会显示类似 `Uvicorn running on http://127.0.0.1:8000` 的字样。
    > **注意**：本地测试默认使用的是极其轻量的 SQLite 数据库。当您首次启动服务时，系统会自动在根目录下创建一个名为 `bluecore_baby.db` 的文件作为您的数据库，真正做到“开箱即用”！
@@ -58,7 +58,7 @@
    本系统原生支持 MySQL，只需要在启动应用前，配置 `DATABASE_URL` 环境变量即可无缝切换：
    ```bash
    export DATABASE_URL="mysql+pymysql://root:您的密码@127.0.0.1/bluecore_baby"
-   uvicorn backend.main:app --reload
+   python -m uvicorn backend.main:app --reload
    ```
 
 ---
