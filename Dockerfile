@@ -15,6 +15,9 @@ COPY . .
 ENV PORT=80
 EXPOSE 80
 
+# 设置 PYTHONPATH 以便能够找到 backend 模块
+ENV PYTHONPATH=/app
+
 # 使用 Gunicorn 启动 Flask 应用，适用于生产环境
-# 注意：Flask 实例在 backend.main 中的变量名为 app
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 backend.main:app
+# 注意：切换工作目录到 backend，这样 gunicorn main:app 就能在其当前目录下直接找到 models.py 和 database.py
+CMD cd backend && exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
