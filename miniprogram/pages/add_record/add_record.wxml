@@ -1,0 +1,80 @@
+<view class="container page-bg">
+  <view class="form-card">
+    <view class="form-title">添加{{title}}记录</view>
+
+    <!-- 公共：日期和时间选择 -->
+    <view class="form-group">
+      <view class="form-label">日期</view>
+      <picker mode="date" value="{{selectedDate}}" end="{{today}}" bindchange="onDateChange">
+        <view class="form-input">{{selectedDate}}</view>
+      </picker>
+    </view>
+    <view class="form-group">
+      <view class="form-label">时间</view>
+      <picker mode="time" value="{{selectedTime}}" bindchange="onTimeChange">
+        <view class="form-input">{{selectedTime}}</view>
+      </picker>
+    </view>
+
+    <!-- 喂养专用表单 -->
+    <block wx:if="{{type === 'feed'}}">
+      <view class="form-group">
+        <view class="form-label">喂养方式</view>
+        <radio-group class="radio-group" bindchange="onFeedTypeChange">
+          <label class="radio-label">
+            <radio value="bottle" checked="{{feedType === 'bottle'}}" color="#A7C7E7"/> 瓶喂 (配方奶/冻奶)
+          </label>
+          <label class="radio-label">
+            <radio value="breast" checked="{{feedType === 'breast'}}" color="#A7C7E7"/> 亲喂 (母乳)
+          </label>
+        </radio-group>
+      </view>
+
+      <block wx:if="{{feedType === 'bottle'}}">
+        <view class="form-group">
+          <view class="form-label">奶量 (ml)</view>
+          <input class="form-input" type="number" placeholder="请输入奶量" value="{{feedAmount}}" bindinput="onAmountInput" />
+        </view>
+      </block>
+
+      <block wx:if="{{feedType === 'breast'}}">
+        <view class="form-group">
+          <view class="form-label">亲喂时长 (分钟)</view>
+          <input class="form-input" type="number" placeholder="请输入时长" value="{{feedDuration}}" bindinput="onDurationInput" />
+        </view>
+        <view class="form-group">
+          <view class="form-label">预估奶量 (ml，选填)</view>
+          <input class="form-input" type="number" placeholder="选填，大概吃了多少" value="{{feedAmount}}" bindinput="onAmountInput" />
+        </view>
+      </block>
+    </block>
+
+    <!-- 尿布专用表单 -->
+    <block wx:if="{{type === 'diaper'}}">
+      <view class="form-group">
+        <view class="form-label">状态</view>
+        <picker mode="selector" range="{{diaperTypes}}" value="{{diaperIndex}}" bindchange="onDiaperChange">
+          <view class="form-input">{{diaperTypes[diaperIndex]}}</view>
+        </picker>
+      </view>
+    </block>
+
+    <!-- 睡眠专用表单 -->
+    <block wx:if="{{type === 'sleep'}}">
+      <view class="form-group">
+        <view class="form-label">入睡时长 (分钟)</view>
+        <input class="form-input" type="number" placeholder="请输入睡了多久" value="{{sleepDuration}}" bindinput="onSleepInput" />
+      </view>
+    </block>
+
+    <!-- 疫苗专用表单 -->
+    <block wx:if="{{type === 'vaccine'}}">
+      <view class="form-group">
+        <view class="form-label">疫苗名称</view>
+        <input class="form-input" type="text" placeholder="如：乙肝疫苗" value="{{vaccineName}}" bindinput="onVaccineInput" />
+      </view>
+    </block>
+
+    <view class="btn-submit" bindtap="submitRecord">保存记录</view>
+  </view>
+</view>

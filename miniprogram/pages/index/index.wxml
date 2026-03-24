@@ -36,14 +36,17 @@
     <!-- 中部：状态大卡片区域 -->
     <view class="status-section">
       <!-- 喂养卡片 -->
-      <view class="card status-card" catchtap="goToHistory" data-type="feed">
+      <view class="card status-card" bindtap="navigateToAddRecord" data-type="feed">
         <view class="card-left">
-          <text class="title">喂养</text>
+          <view class="title-wrap">
+            <text class="title">喂养</text>
+            <text class="view-history" catchtap="goToHistory" data-type="feed">历史 ></text>
+          </view>
           <text class="detail" wx:if="{{lastFeed.value}}">最近: {{lastFeed.value}}{{lastFeed.unit}} ({{lastFeed.sub_type}})</text>
           <text class="detail" wx:else>点击记录</text>
           <text class="time-ago">{{lastFeed.timeAgo}}</text>
         </view>
-        <view class="card-right" catchtap="recordFeed">
+        <view class="card-right">
           <view class="icon-box icon-feed">
             <text class="icon-text">🍼</text>
           </view>
@@ -51,14 +54,17 @@
       </view>
 
       <!-- 尿布卡片 -->
-      <view class="card status-card" catchtap="goToHistory" data-type="diaper">
+      <view class="card status-card" bindtap="navigateToAddRecord" data-type="diaper">
         <view class="card-left">
-          <text class="title">尿布</text>
+          <view class="title-wrap">
+            <text class="title">尿布</text>
+            <text class="view-history" catchtap="goToHistory" data-type="diaper">历史 ></text>
+          </view>
           <text class="detail" wx:if="{{lastDiaper.sub_type}}">状态: {{lastDiaper.sub_type}}</text>
           <text class="detail" wx:else>点击记录</text>
           <text class="time-ago">{{lastDiaper.timeAgo}}</text>
         </view>
-        <view class="card-right" catchtap="recordDiaper">
+        <view class="card-right">
           <view class="icon-box icon-diaper">
             <text class="icon-text">💧</text>
           </view>
@@ -66,15 +72,18 @@
       </view>
 
       <!-- 睡眠卡片 -->
-      <view class="card status-card" catchtap="goToHistory" data-type="sleep">
+      <view class="card status-card" bindtap="navigateToAddRecord" data-type="sleep">
         <view class="card-left">
-          <text class="title">睡眠</text>
+          <view class="title-wrap">
+            <text class="title">睡眠</text>
+            <text class="view-history" catchtap="goToHistory" data-type="sleep">历史 ></text>
+          </view>
           <text class="detail" wx:if="{{lastSleep.duration}}">正在睡觉...</text>
           <text class="detail" wx:else>点击记录</text>
           <text class="time-ago" wx:if="{{lastSleep.duration}}">已睡 45min</text>
           <text class="time-ago" wx:else>{{lastSleep.timeAgo}}</text>
         </view>
-        <view class="card-right" catchtap="recordSleep">
+        <view class="card-right">
           <view class="icon-box icon-sleep">
             <text class="icon-text">🌙</text>
           </view>
@@ -82,14 +91,17 @@
       </view>
 
       <!-- 疫苗卡片 -->
-      <view class="card status-card" catchtap="goToHistory" data-type="vaccine">
+      <view class="card status-card" bindtap="navigateToAddRecord" data-type="vaccine">
         <view class="card-left">
-          <text class="title">疫苗</text>
+          <view class="title-wrap">
+            <text class="title">疫苗</text>
+            <text class="view-history" catchtap="goToHistory" data-type="vaccine">历史 ></text>
+          </view>
           <text class="detail" wx:if="{{lastVaccine.sub_type}}">最近: {{lastVaccine.sub_type}}</text>
           <text class="detail" wx:else>点击记录</text>
           <text class="time-ago">{{lastVaccine.timeAgo}}</text>
         </view>
-        <view class="card-right" catchtap="recordVaccine">
+        <view class="card-right">
           <view class="icon-box icon-vaccine">
             <text class="icon-text">💉</text>
           </view>

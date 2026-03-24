@@ -1,0 +1,76 @@
+.page-bg {
+  background-color: #F8F5F2; /* 奶油背景色 */
+  min-height: 100vh;
+  padding: 40rpx;
+  box-sizing: border-box;
+}
+
+.form-card {
+  background-color: #FFFFFF;
+  border-radius: 36rpx;
+  padding: 50rpx;
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.03);
+}
+
+.form-title {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #1A2F4C;
+  margin-bottom: 50rpx;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 40rpx;
+}
+
+.form-label {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+.form-input {
+  width: 100%;
+  padding: 24rpx;
+  background-color: #F8F9FA;
+  border-radius: 16rpx;
+  font-size: 32rpx;
+  color: #333;
+  box-sizing: border-box;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  font-size: 30rpx;
+  color: #333;
+}
+
+.radio-label radio {
+  transform: scale(0.9);
+  margin-right: 16rpx;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 30rpx;
+  background-color: #A7C7E7;
+  color: #FFF;
+  border-radius: 100rpx;
+  text-align: center;
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-top: 60rpx;
+  box-shadow: 0 10rpx 20rpx rgba(167, 199, 231, 0.4);
+}
+.btn-submit:active {
+  transform: scale(0.98);
+}
