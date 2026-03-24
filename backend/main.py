@@ -71,7 +71,7 @@ def login():
     if not user:
         random_suffix = "".join(random.choices("0123456789", k=4))
         default_nickname = f"蓝核家长_{random_suffix}"
-        default_avatar = "/images/default_parent_avatar.png"
+        default_avatar = "/images/default_parent_avatar.svg"
 
         user = models.User(
             openid=openid,
@@ -136,7 +136,9 @@ def create_record():
     start_time_str = data.get('start_time')
     if start_time_str:
         try:
-            start_time = datetime.datetime.fromisoformat(start_time_str.replace('Z', '+00:00'))
+            # 兼容带有 Z 或时区信息的时间字符串，存入数据库前统一转为 naive datetime
+            parsed_time = datetime.datetime.fromisoformat(start_time_str.replace('Z', '+00:00'))
+            start_time = parsed_time.replace(tzinfo=None)
         except ValueError:
             start_time = datetime.datetime.utcnow()
     else:

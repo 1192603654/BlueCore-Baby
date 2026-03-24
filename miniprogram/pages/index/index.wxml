@@ -20,7 +20,7 @@
               bindtap="switchBaby"
               data-id="{{item.id}}">
           <view class="avatar-ring">
-            <image class="avatar" src="{{item.avatar || '/images/default_baby.png'}}" mode="aspectFill"></image>
+            <image class="avatar" src="{{item.avatar || '/images/default_baby.svg'}}" mode="aspectFill"></image>
           </view>
           <text class="name">{{item.name}}</text>
         </view>
@@ -129,12 +129,6 @@
     <view class="nav-item" bindtap="goToStats">
       <text class="nav-icon">🕒</text>
       <text class="nav-text">记录</text>
-    </view>
-    <view class="nav-item">
-      <view class="nav-plus-btn">
-        <text class="nav-plus-icon">+</text>
-      </view>
-      <text class="nav-text">添加</text>
     </view>
   </view>
 </view>

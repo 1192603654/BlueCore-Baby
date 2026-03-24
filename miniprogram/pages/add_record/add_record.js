@@ -73,6 +73,11 @@ Page({
     this.setData({ feedAmount: e.detail.value });
   },
 
+  quickSetAmount(e) {
+    const val = e.currentTarget.dataset.val;
+    this.setData({ feedAmount: val });
+  },
+
   onDurationInput(e) {
     this.setData({ feedDuration: e.detail.value });
   },
