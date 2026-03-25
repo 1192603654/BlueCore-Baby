@@ -352,7 +352,7 @@ def get_ai_suggestion(baby_id):
         请直接输出建议正文。
         """
         payload = {
-            "model": "openrouter/free",
+            "model": "nvidia/nemotron-nano-12b-v2-vl:free",
             "messages": [{"role": "user", "content": prompt}]
         }
 
