@@ -4,6 +4,8 @@ import jwt
 import datetime
 import uuid
 import random
+import requests
+import json
 from sqlalchemy import func
 
 import models
@@ -264,7 +266,69 @@ def get_daily_stats(baby_id):
         func.date(models.Record.start_time) == target_date
     ).count()
 
-    ai_suggestion = "【智能管家建议】宝宝今天喝奶量和排便情况都在正常范围内。如果夜间有偶尔哭闹，可能是进入了猛涨期，建议多陪伴安抚，可以适当增加白天的活动量。请继续保持良好的记录习惯哦！"
+    # 额外统计睡眠次数，为 AI 分析提供更多维度
+    sleep_count = g.db.query(models.Record).filter(
+        models.Record.baby_id == baby_id,
+        models.Record.type == "sleep",
+        func.date(models.Record.start_time) == target_date
+    ).count()
+
+    # 计算宝宝日龄（如果填了出生时间的话）
+    days_old_str = "未知天数"
+    if baby.birth_time:
+        days_old = (target_date - baby.birth_time.date()).days
+        if days_old < 0:
+            days_old_str = "还未出生"
+        else:
+            days_old_str = f"{days_old} 天"
+
+    # 调用 OpenRouter 的免费模型生成 AI 智能分析
+    ai_suggestion = ""
+    openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
+
+    if openrouter_api_key:
+        prompt = f"""
+        你是一位专业的育儿管家。请根据以下宝宝今天的记录数据，给出一小段温馨、简短（不超过80字）的育儿建议或鼓励。语气要像知心朋友一样，避免说教和过于生硬。
+        【宝宝信息】
+        - 名字：{baby.name}
+        - 日龄：{days_old_str}
+        【今日数据】
+        - 喂养次数：{total_feed_times}次
+        - 总奶量（瓶喂计算值）：{total_feed_ml} ml
+        - 换尿布次数：{diaper_count}次
+        - 记录睡眠次数：{sleep_count}次
+
+        请直接输出建议正文。
+        """
+        try:
+            response = requests.post(
+                url="https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {openrouter_api_key}",
+                    "Content-Type": "application/json",
+                },
+                data=json.dumps({
+                    "model": "openrouter/free", # 使用免费模型
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    "reasoning": {"enabled": True}
+                }),
+                timeout=10 # 防止接口超时卡死
+            )
+
+            if response.status_code == 200:
+                res_data = response.json()
+                ai_suggestion = res_data['choices'][0]['message'].get('content', '').strip()
+        except Exception as e:
+            print("OpenRouter API 调用失败:", e)
+
+    # 如果接口调用失败或未配置 Key，使用优雅降级的静态回复
+    if not ai_suggestion:
+        ai_suggestion = "【智能管家建议】宝宝今天喝奶量和排便情况都在正常范围内。如果夜间有偶尔哭闹，可能是进入了猛涨期，建议多陪伴安抚，可以适当增加白天的活动量。请继续保持良好的记录习惯哦！"
 
     return jsonify({
         "total_feed_ml": total_feed_ml,
