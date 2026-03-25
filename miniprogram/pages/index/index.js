@@ -46,30 +46,9 @@ Page({
   },
 
   addBaby: function () {
-    // 使用带输入框的模态框让用户输入宝宝名称
-    wx.showModal({
-      title: '添加宝宝',
-      content: '',
-      editable: true,
-      placeholderText: '请输入宝宝名字',
-      success: (res) => {
-        if (res.confirm && res.content) {
-          api.post('/babies', { name: res.content }).then(baby => {
-            // 设置回调以更新当前页面的宝宝列表
-            app.babiesReadyCallback = babies => {
-              this.setData({
-                babies: babies,
-                currentBabyId: app.globalData.currentBabyId
-              });
-              this.loadRecentRecords();
-            };
-            app.loadBabies(); // 重新加载宝宝
-            wx.showToast({ title: '宝宝已添加' });
-          });
-        } else if (res.confirm && !res.content) {
-            wx.showToast({ title: '名字不能为空', icon: 'none' });
-        }
-      }
+    // 跳转到专门的添加宝宝页面
+    wx.navigateTo({
+      url: '/pages/add_baby/add_baby'
     });
   },
 

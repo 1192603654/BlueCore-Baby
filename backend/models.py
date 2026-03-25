@@ -21,6 +21,7 @@ class Baby(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True, nullable=False)
     avatar = Column(String, nullable=True) # 头像 URL
+    birth_time = Column(DateTime, nullable=True) # 宝宝的具体出生日期和时间（精确到分）
     parent_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
 

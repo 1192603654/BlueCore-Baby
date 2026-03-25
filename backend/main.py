@@ -101,7 +101,13 @@ def login():
 def get_babies():
     user_id = g.user_id
     babies = g.db.query(models.Baby).filter(models.Baby.parent_id == user_id).all()
-    return jsonify([{"id": b.id, "name": b.name, "avatar": b.avatar, "created_at": b.created_at.isoformat()} for b in babies])
+    return jsonify([{
+        "id": b.id,
+        "name": b.name,
+        "avatar": b.avatar,
+        "birth_time": b.birth_time.isoformat() + "Z" if b.birth_time else None,
+        "created_at": b.created_at.isoformat()
+    } for b in babies])
 
 # --- 路由：创建宝宝 ---
 @app.route('/babies', methods=['POST'])
@@ -112,11 +118,33 @@ def create_baby():
     if not name:
         return jsonify({"detail": "缺失宝宝名字"}), 400
 
-    db_baby = models.Baby(name=name, avatar=data.get('avatar'), parent_id=g.user_id)
+    birth_time_str = data.get('birth_time')
+    birth_time = None
+    if birth_time_str:
+        try:
+            # 同样兼容带 Z 或时区的字符串，转为 naive datetime
+            parsed_time = datetime.datetime.fromisoformat(birth_time_str.replace('Z', '+00:00'))
+            birth_time = parsed_time.replace(tzinfo=None)
+        except ValueError:
+            pass
+
+    db_baby = models.Baby(
+        name=name,
+        avatar=data.get('avatar'),
+        birth_time=birth_time,
+        parent_id=g.user_id
+    )
     g.db.add(db_baby)
     g.db.commit()
     g.db.refresh(db_baby)
-    return jsonify({"id": db_baby.id, "name": db_baby.name, "avatar": db_baby.avatar, "created_at": db_baby.created_at.isoformat()})
+
+    return jsonify({
+        "id": db_baby.id,
+        "name": db_baby.name,
+        "avatar": db_baby.avatar,
+        "birth_time": db_baby.birth_time.isoformat() + "Z" if db_baby.birth_time else None,
+        "created_at": db_baby.created_at.isoformat()
+    })
 
 # --- 路由：创建行为记录 ---
 @app.route('/records', methods=['POST'])

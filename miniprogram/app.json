@@ -3,7 +3,8 @@
     "pages/index/index",
     "pages/history/history",
     "pages/stats/stats",
-    "pages/add_record/add_record"
+    "pages/add_record/add_record",
+    "pages/add_baby/add_baby"
   ],
   "window": {
     "navigationBarBackgroundColor": "#F8F5F2",
