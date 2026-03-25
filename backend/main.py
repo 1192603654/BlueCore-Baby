@@ -6,11 +6,16 @@ import uuid
 import random
 import requests
 import json
+import logging
 from sqlalchemy import func
 
 import models
 import database
 from database import engine
+
+# 配置基础日志，方便在控制台和微信云托管日志中查看
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # 初始化数据库结构
 models.Base.metadata.create_all(bind=engine)
@@ -300,31 +305,45 @@ def get_daily_stats(baby_id):
 
         请直接输出建议正文。
         """
+        payload = {
+            "model": "openrouter/free",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+            # 移除 reasoning 参数，有些模型不支持该参数会直接报 400 Bad Request 错误
+        }
+
         try:
+            logger.info("正在调用 OpenRouter 智能分析接口...")
+            logger.info(f"Payload: {json.dumps(payload, ensure_ascii=False)}")
+
             response = requests.post(
                 url="https://openrouter.ai/api/v1/chat/completions",
                 headers={
                     "Authorization": f"Bearer {openrouter_api_key}",
                     "Content-Type": "application/json",
                 },
-                data=json.dumps({
-                    "model": "openrouter/free", # 使用免费模型
-                    "messages": [
-                        {
-                            "role": "user",
-                            "content": prompt
-                        }
-                    ],
-                    "reasoning": {"enabled": True}
-                }),
-                timeout=10 # 防止接口超时卡死
+                data=json.dumps(payload),
+                timeout=15 # 网络波动可能较大，放宽至15s
             )
 
             if response.status_code == 200:
                 res_data = response.json()
                 ai_suggestion = res_data['choices'][0]['message'].get('content', '').strip()
+                logger.info(f"OpenRouter 分析成功: {ai_suggestion}")
+            else:
+                logger.error(f"OpenRouter 接口调用失败 (HTTP {response.status_code}): {response.text}")
+        except requests.exceptions.Timeout:
+            logger.error("OpenRouter API 调用超时 (超过 15 秒)")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"OpenRouter API 请求异常: {e}")
         except Exception as e:
-            print("OpenRouter API 调用失败:", e)
+            logger.exception("OpenRouter API 解析时发生未知错误")
+    else:
+        logger.info("环境变量 OPENROUTER_API_KEY 未配置，跳过大模型调用。")
 
     # 如果接口调用失败或未配置 Key，使用优雅降级的静态回复
     if not ai_suggestion:
