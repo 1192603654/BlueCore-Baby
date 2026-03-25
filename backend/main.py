@@ -8,6 +8,7 @@ import requests
 import json
 import logging
 from sqlalchemy import func
+from openai import OpenAI
 
 import models
 import database
@@ -335,10 +336,10 @@ def get_ai_suggestion(baby_id):
             days_old_str = f"{days_old} 天"
 
     ai_suggestion = ""
-    openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
+    dashscope_api_key = os.getenv("DASHSCOPE_API_KEY")
 
-    if not openrouter_api_key:
-        logger.info("环境变量 OPENROUTER_API_KEY 未配置，跳过大模型调用。")
+    if not dashscope_api_key:
+        logger.info("环境变量 DASHSCOPE_API_KEY 未配置，跳过大模型调用。")
         return Response(stream_with_context(iter(["【智能管家建议】宝宝今天喝奶量和排便情况都在正常范围内。如果夜间有偶尔哭闹，可能是进入了猛涨期，建议多陪伴安抚，可以适当增加白天的活动量。请继续保持良好的记录习惯哦！"])), content_type='text/plain')
 
     prompt = f"""
@@ -354,53 +355,38 @@ def get_ai_suggestion(baby_id):
 
     请直接输出建议正文。
     """
-    payload = {
-        "model": "nvidia/nemotron-nano-12b-v2-vl:free",
-        "messages": [{"role": "user", "content": prompt}],
-        "stream": True # 开启流式响应
-    }
 
     def generate_ai_response():
         try:
-            logger.info("正在调用 OpenRouter 流式分析接口...")
-            response = requests.post(
-                url="https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {openrouter_api_key}",
-                    "Content-Type": "application/json",
-                },
-                data=json.dumps(payload),
-                stream=True,
-                timeout=30
+            logger.info("正在调用阿里云 DashScope 流式分析接口...")
+            client = OpenAI(
+                api_key=dashscope_api_key,
+                base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
             )
 
-            if response.status_code != 200:
-                logger.error(f"OpenRouter 调用失败: HTTP {response.status_code} - {response.text}")
-                yield "【智能管家建议】当前网络有点慢，请稍后再试。宝宝每天的饮食排便只要保持规律，就是健康成长的表现哦！"
-                return
+            response_stream = client.chat.completions.create(
+                model="qwen3-vl-flash",
+                messages=[
+                    {"role": "user", "content": [{"type": "text", "text": prompt}]}
+                ],
+                stream=True
+            )
 
-            for line in response.iter_lines():
-                if line:
-                    decoded_line = line.decode('utf-8')
-                    if decoded_line.startswith("data: "):
-                        json_str = decoded_line[6:]
-                        if json_str == "[DONE]":
-                            break
-                        try:
-                            chunk = json.loads(json_str)
-                            # 提取文字内容推送给前端
-                            if "choices" in chunk and len(chunk["choices"]) > 0:
-                                delta = chunk["choices"][0].get("delta", {})
-                                if "content" in delta and delta["content"] is not None:
-                                    yield delta["content"]
+            for chunk in response_stream:
+                if chunk.choices and len(chunk.choices) > 0:
+                    delta_content = chunk.choices[0].delta.content
+                    if delta_content:
+                        yield delta_content
 
-                            # 打印使用量和 reasoning 统计到后端日志中
-                            if "usage" in chunk and "reasoningTokens" in chunk["usage"]:
-                                logger.info(f"OpenRouter 消耗推理 Token (Reasoning Tokens): {chunk['usage']['reasoningTokens']}")
-                        except json.JSONDecodeError:
-                            logger.error(f"解析 JSON 块失败: {json_str}")
+                # 处理 token 消耗记录（如果提供的话，在最后一个 chunk 里或者额外的 usage 字段）
+                if hasattr(chunk, 'usage') and chunk.usage:
+                    if hasattr(chunk.usage, 'reasoning_tokens') and chunk.usage.reasoning_tokens is not None:
+                        logger.info(f"DashScope 消耗推理 Token (Reasoning Tokens): {chunk.usage.reasoning_tokens}")
+                    elif hasattr(chunk.usage, 'total_tokens') and chunk.usage.total_tokens is not None:
+                        logger.info(f"DashScope 消耗总 Token: {chunk.usage.total_tokens}")
+
         except Exception as e:
-            logger.exception("OpenRouter 流式解析异常")
+            logger.exception("DashScope 流式解析异常")
             yield "【错误】连接中断，请重试。"
 
     return Response(stream_with_context(generate_ai_response()), content_type='text/plain')
