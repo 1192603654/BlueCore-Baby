@@ -63,12 +63,22 @@ Page({
   fetchAISuggestion(babyId, date) {
     this.setData({ aiLoading: true, aiSuggestion: '' });
 
-    // 请求 AI 接口时传入特殊的 30000ms 超时参数
-    api.get(`/stats/ai_suggestion/${babyId}?query_date=${date}`, {}, 30000).then(res => {
-        this.setData({
-            aiSuggestion: res.ai_suggestion || '暂无建议',
-            aiLoading: false
-        });
+    // 使用 stream 接口接收打字机效果数据
+    api.stream(`/stats/ai_suggestion/${babyId}?query_date=${date}`, {}, 30000, (chunk) => {
+        if (chunk) {
+            this.setData({
+                aiSuggestion: this.data.aiSuggestion + chunk,
+                aiLoading: false // 收到第一个字节就取消 loading
+            });
+        }
+    }).then(() => {
+        // 请求完成
+        if (!this.data.aiSuggestion) {
+            this.setData({
+                aiSuggestion: '暂无建议',
+                aiLoading: false
+            });
+        }
     }).catch(err => {
         console.error('获取 AI 建议失败', err);
         this.setData({

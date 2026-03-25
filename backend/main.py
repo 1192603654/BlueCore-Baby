@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, g
+from flask import Flask, request, jsonify, g, Response, stream_with_context
 import os
 import jwt
 import datetime
@@ -337,27 +337,32 @@ def get_ai_suggestion(baby_id):
     ai_suggestion = ""
     openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
 
-    if openrouter_api_key:
-        prompt = f"""
-        你是一位专业的育儿管家。请根据以下宝宝今天的记录数据，给出一小段温馨、简短（不超过80字）的育儿建议或鼓励。语气要像知心朋友一样，避免说教和过于生硬。
-        【宝宝信息】
-        - 名字：{baby.name}
-        - 日龄：{days_old_str}
-        【今日数据】
-        - 喂养次数：{total_feed_times}次
-        - 总奶量（瓶喂计算值）：{total_feed_ml} ml
-        - 换尿布次数：{diaper_count}次
-        - 记录睡眠次数：{sleep_count}次
+    if not openrouter_api_key:
+        logger.info("环境变量 OPENROUTER_API_KEY 未配置，跳过大模型调用。")
+        return Response(stream_with_context(iter(["【智能管家建议】宝宝今天喝奶量和排便情况都在正常范围内。如果夜间有偶尔哭闹，可能是进入了猛涨期，建议多陪伴安抚，可以适当增加白天的活动量。请继续保持良好的记录习惯哦！"])), content_type='text/plain')
 
-        请直接输出建议正文。
-        """
-        payload = {
-            "model": "nvidia/nemotron-nano-12b-v2-vl:free",
-            "messages": [{"role": "user", "content": prompt}]
-        }
+    prompt = f"""
+    你是一位专业的育儿管家。请根据以下宝宝今天的记录数据，给出一小段温馨、简短（不超过80字）的育儿建议或鼓励。语气要像知心朋友一样，避免说教和过于生硬。
+    【宝宝信息】
+    - 名字：{baby.name}
+    - 日龄：{days_old_str}
+    【今日数据】
+    - 喂养次数：{total_feed_times}次
+    - 总奶量（瓶喂计算值）：{total_feed_ml} ml
+    - 换尿布次数：{diaper_count}次
+    - 记录睡眠次数：{sleep_count}次
 
+    请直接输出建议正文。
+    """
+    payload = {
+        "model": "nvidia/nemotron-nano-12b-v2-vl:free",
+        "messages": [{"role": "user", "content": prompt}],
+        "stream": True # 开启流式响应
+    }
+
+    def generate_ai_response():
         try:
-            logger.info("正在调用 OpenRouter 智能分析接口...")
+            logger.info("正在调用 OpenRouter 流式分析接口...")
             response = requests.post(
                 url="https://openrouter.ai/api/v1/chat/completions",
                 headers={
@@ -365,25 +370,40 @@ def get_ai_suggestion(baby_id):
                     "Content-Type": "application/json",
                 },
                 data=json.dumps(payload),
-                timeout=28 # 放宽至28秒，防止小程序端 30s 整体断开
+                stream=True,
+                timeout=30
             )
 
-            if response.status_code == 200:
-                res_data = response.json()
-                ai_suggestion = res_data['choices'][0]['message'].get('content', '').strip()
-                logger.info(f"OpenRouter 分析成功: {ai_suggestion}")
-            else:
+            if response.status_code != 200:
                 logger.error(f"OpenRouter 调用失败: HTTP {response.status_code} - {response.text}")
-        except requests.exceptions.Timeout:
-            logger.error("OpenRouter API 调用超时 (超过 28 秒)")
+                yield "【智能管家建议】当前网络有点慢，请稍后再试。宝宝每天的饮食排便只要保持规律，就是健康成长的表现哦！"
+                return
+
+            for line in response.iter_lines():
+                if line:
+                    decoded_line = line.decode('utf-8')
+                    if decoded_line.startswith("data: "):
+                        json_str = decoded_line[6:]
+                        if json_str == "[DONE]":
+                            break
+                        try:
+                            chunk = json.loads(json_str)
+                            # 提取文字内容推送给前端
+                            if "choices" in chunk and len(chunk["choices"]) > 0:
+                                delta = chunk["choices"][0].get("delta", {})
+                                if "content" in delta and delta["content"] is not None:
+                                    yield delta["content"]
+
+                            # 打印使用量和 reasoning 统计到后端日志中
+                            if "usage" in chunk and "reasoningTokens" in chunk["usage"]:
+                                logger.info(f"OpenRouter 消耗推理 Token (Reasoning Tokens): {chunk['usage']['reasoningTokens']}")
+                        except json.JSONDecodeError:
+                            logger.error(f"解析 JSON 块失败: {json_str}")
         except Exception as e:
-            logger.exception("OpenRouter API 发生异常")
+            logger.exception("OpenRouter 流式解析异常")
+            yield "【错误】连接中断，请重试。"
 
-    # 如果没有配置 Key 或是调用失败，下发静态兜底方案
-    if not ai_suggestion:
-        ai_suggestion = "【智能管家建议】宝宝今天喝奶量和排便情况都在正常范围内。如果夜间有偶尔哭闹，可能是进入了猛涨期，建议多陪伴安抚，可以适当增加白天的活动量。请继续保持良好的记录习惯哦！"
-
-    return jsonify({"ai_suggestion": ai_suggestion})
+    return Response(stream_with_context(generate_ai_response()), content_type='text/plain')
 
 # --- 路由：广告配置 ---
 @app.route('/config/ads', methods=['GET'])

@@ -19,7 +19,7 @@ const initCloud = () => {
     }
 };
 
-const request = (method, endpoint, data = {}, timeout = 10000) => {
+const request = (method, endpoint, data = {}, timeout = 10000, enableChunked = false, onChunkReceived = null) => {
   return new Promise((resolve, reject) => {
     let token = '';
     try {
@@ -44,7 +44,7 @@ const request = (method, endpoint, data = {}, timeout = 10000) => {
     // 优先尝试使用微信云托管发起内网调用（安全、无需备案域名）
     if (wx.cloud && CLOUD_ENV_ID !== 'your-cloud-env-id') {
         initCloud();
-        wx.cloud.callContainer({
+        const requestTask = wx.cloud.callContainer({
             config: {
                 env: CLOUD_ENV_ID,
             },
@@ -53,6 +53,7 @@ const request = (method, endpoint, data = {}, timeout = 10000) => {
             method: method,
             data: data,
             timeout: timeout,
+            enableChunked: enableChunked,
             success: (res) => {
                 if (res.statusCode >= 200 && res.statusCode < 300) {
                     resolve(res.data);
@@ -68,14 +69,19 @@ const request = (method, endpoint, data = {}, timeout = 10000) => {
                 reject(err);
             }
         });
+
+        if (enableChunked && onChunkReceived && requestTask) {
+            requestTask.onChunkReceived(onChunkReceived);
+        }
     } else {
         // Fallback: 传统 HTTPS/HTTP 网络请求（走外网或本地测试）
-        wx.request({
+        const requestTask = wx.request({
             url: `${BASE_URL}${endpoint}`,
             method: method,
             data: data,
             header: headers,
             timeout: timeout,
+            enableChunked: enableChunked,
             success: (res) => {
                 if (res.statusCode >= 200 && res.statusCode < 300) {
                 resolve(res.data);
@@ -91,15 +97,60 @@ const request = (method, endpoint, data = {}, timeout = 10000) => {
                 reject(err);
             }
         });
+
+        if (enableChunked && onChunkReceived && requestTask) {
+            requestTask.onChunkReceived(onChunkReceived);
+        }
     }
   });
+};
+
+const decodeUtf8 = (arrayBuffer) => {
+    let result = '';
+    let i = 0;
+    let c = 0;
+    let c1 = 0;
+    let c2 = 0;
+    let c3 = 0;
+    const data = new Uint8Array(arrayBuffer);
+
+    while (i < data.length) {
+        c = data[i];
+        if (c < 128) {
+            result += String.fromCharCode(c);
+            i++;
+        } else if ((c > 191) && (c < 224)) {
+            c2 = data[i + 1];
+            result += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+            i += 2;
+        } else if ((c > 223) && (c < 240)) {
+            c2 = data[i + 1];
+            c3 = data[i + 2];
+            result += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+            i += 3;
+        } else {
+            // 处理 4 字节及以上的辅助平面字符 (Emoji 等)，避免乱码
+            // 这里为了极简兼容小程序，将其作为一个普通占位符，或可引入更完善的 decoder
+            result += '?';
+            i += 4;
+        }
+    }
+    return result;
 };
 
 const api = {
   get: (endpoint, data, timeout) => request('GET', endpoint, data, timeout),
   post: (endpoint, data, timeout) => request('POST', endpoint, data, timeout),
   put: (endpoint, data, timeout) => request('PUT', endpoint, data, timeout),
-  delete: (endpoint, data, timeout) => request('DELETE', endpoint, data, timeout)
+  delete: (endpoint, data, timeout) => request('DELETE', endpoint, data, timeout),
+  stream: (endpoint, data, timeout, onMessage) => {
+      return request('GET', endpoint, data, timeout, true, (response) => {
+          if (onMessage && response.data) {
+              const text = decodeUtf8(response.data);
+              onMessage(text);
+          }
+      });
+  }
 };
 
 export default api;
