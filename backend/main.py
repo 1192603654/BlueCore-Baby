@@ -278,7 +278,54 @@ def get_daily_stats(baby_id):
         func.date(models.Record.start_time) == target_date
     ).count()
 
-    # 计算宝宝日龄（如果填了出生时间的话）
+    # 统计接口现在只返回基础数据，保证毫秒级响应
+    return jsonify({
+        "total_feed_ml": total_feed_ml,
+        "total_feed_times": total_feed_times,
+        "total_diaper_times": diaper_count,
+        "ai_suggestion": "" # 前端将通过独立接口异步获取
+    })
+
+# --- 路由：独立获取每日 AI 智能分析（异步调用，放宽超时） ---
+@app.route('/stats/ai_suggestion/<int:baby_id>', methods=['GET'])
+@login_required
+def get_ai_suggestion(baby_id):
+    query_date = request.args.get('query_date')
+    baby = g.db.query(models.Baby).filter(models.Baby.id == baby_id, models.Baby.parent_id == g.user_id).first()
+    if not baby:
+        return jsonify({"detail": "未找到宝宝或无权限"}), 404
+
+    if not query_date:
+        query_date = datetime.date.today().isoformat()
+
+    try:
+        target_date = datetime.datetime.strptime(query_date, "%Y-%m-%d").date()
+    except ValueError:
+        return jsonify({"detail": "日期格式错误"}), 400
+
+    # 聚合当天所有数据，为 AI 提词做准备
+    feed_records = g.db.query(models.Record).filter(
+        models.Record.baby_id == baby_id,
+        models.Record.type == "feed",
+        func.date(models.Record.start_time) == target_date
+    ).all()
+
+    total_feed_ml = sum((r.value for r in feed_records if r.value and r.unit == "ml"))
+    total_feed_times = len(feed_records)
+
+    diaper_count = g.db.query(models.Record).filter(
+        models.Record.baby_id == baby_id,
+        models.Record.type == "diaper",
+        func.date(models.Record.start_time) == target_date
+    ).count()
+
+    sleep_count = g.db.query(models.Record).filter(
+        models.Record.baby_id == baby_id,
+        models.Record.type == "sleep",
+        func.date(models.Record.start_time) == target_date
+    ).count()
+
+    # 计算日龄
     days_old_str = "未知天数"
     if baby.birth_time:
         days_old = (target_date - baby.birth_time.date()).days
@@ -287,7 +334,6 @@ def get_daily_stats(baby_id):
         else:
             days_old_str = f"{days_old} 天"
 
-    # 调用 OpenRouter 的免费模型生成 AI 智能分析
     ai_suggestion = ""
     openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
 
@@ -307,19 +353,11 @@ def get_daily_stats(baby_id):
         """
         payload = {
             "model": "openrouter/free",
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
-            # 移除 reasoning 参数，有些模型不支持该参数会直接报 400 Bad Request 错误
+            "messages": [{"role": "user", "content": prompt}]
         }
 
         try:
             logger.info("正在调用 OpenRouter 智能分析接口...")
-            logger.info(f"Payload: {json.dumps(payload, ensure_ascii=False)}")
-
             response = requests.post(
                 url="https://openrouter.ai/api/v1/chat/completions",
                 headers={
@@ -327,7 +365,7 @@ def get_daily_stats(baby_id):
                     "Content-Type": "application/json",
                 },
                 data=json.dumps(payload),
-                timeout=15 # 网络波动可能较大，放宽至15s
+                timeout=28 # 放宽至28秒，防止小程序端 30s 整体断开
             )
 
             if response.status_code == 200:
@@ -335,26 +373,17 @@ def get_daily_stats(baby_id):
                 ai_suggestion = res_data['choices'][0]['message'].get('content', '').strip()
                 logger.info(f"OpenRouter 分析成功: {ai_suggestion}")
             else:
-                logger.error(f"OpenRouter 接口调用失败 (HTTP {response.status_code}): {response.text}")
+                logger.error(f"OpenRouter 调用失败: HTTP {response.status_code} - {response.text}")
         except requests.exceptions.Timeout:
-            logger.error("OpenRouter API 调用超时 (超过 15 秒)")
-        except requests.exceptions.RequestException as e:
-            logger.error(f"OpenRouter API 请求异常: {e}")
+            logger.error("OpenRouter API 调用超时 (超过 28 秒)")
         except Exception as e:
-            logger.exception("OpenRouter API 解析时发生未知错误")
-    else:
-        logger.info("环境变量 OPENROUTER_API_KEY 未配置，跳过大模型调用。")
+            logger.exception("OpenRouter API 发生异常")
 
-    # 如果接口调用失败或未配置 Key，使用优雅降级的静态回复
+    # 如果没有配置 Key 或是调用失败，下发静态兜底方案
     if not ai_suggestion:
         ai_suggestion = "【智能管家建议】宝宝今天喝奶量和排便情况都在正常范围内。如果夜间有偶尔哭闹，可能是进入了猛涨期，建议多陪伴安抚，可以适当增加白天的活动量。请继续保持良好的记录习惯哦！"
 
-    return jsonify({
-        "total_feed_ml": total_feed_ml,
-        "total_feed_times": total_feed_times,
-        "total_diaper_times": diaper_count,
-        "ai_suggestion": ai_suggestion
-    })
+    return jsonify({"ai_suggestion": ai_suggestion})
 
 # --- 路由：广告配置 ---
 @app.route('/config/ads', methods=['GET'])

@@ -19,7 +19,7 @@ const initCloud = () => {
     }
 };
 
-const request = (method, endpoint, data = {}) => {
+const request = (method, endpoint, data = {}, timeout = 10000) => {
   return new Promise((resolve, reject) => {
     let token = '';
     try {
@@ -52,6 +52,7 @@ const request = (method, endpoint, data = {}) => {
             header: headers,
             method: method,
             data: data,
+            timeout: timeout,
             success: (res) => {
                 if (res.statusCode >= 200 && res.statusCode < 300) {
                     resolve(res.data);
@@ -74,6 +75,7 @@ const request = (method, endpoint, data = {}) => {
             method: method,
             data: data,
             header: headers,
+            timeout: timeout,
             success: (res) => {
                 if (res.statusCode >= 200 && res.statusCode < 300) {
                 resolve(res.data);
@@ -94,10 +96,10 @@ const request = (method, endpoint, data = {}) => {
 };
 
 const api = {
-  get: (endpoint, data) => request('GET', endpoint, data),
-  post: (endpoint, data) => request('POST', endpoint, data),
-  put: (endpoint, data) => request('PUT', endpoint, data),
-  delete: (endpoint, data) => request('DELETE', endpoint, data)
+  get: (endpoint, data, timeout) => request('GET', endpoint, data, timeout),
+  post: (endpoint, data, timeout) => request('POST', endpoint, data, timeout),
+  put: (endpoint, data, timeout) => request('PUT', endpoint, data, timeout),
+  delete: (endpoint, data, timeout) => request('DELETE', endpoint, data, timeout)
 };
 
 export default api;

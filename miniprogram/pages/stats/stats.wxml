@@ -38,7 +38,8 @@
       <text class="ai-title">智能管家建议</text>
     </view>
     <view class="ai-content">
-      <text>{{stats.ai_suggestion || '暂无分析建议'}}</text>
+      <text wx:if="{{aiLoading}}" class="ai-loading">正在思考中，请稍候...</text>
+      <text wx:else>{{aiSuggestion}}</text>
     </view>
   </view>
 </view>
