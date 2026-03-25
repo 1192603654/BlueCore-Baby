@@ -44,20 +44,19 @@ Page({
       return;
     }
 
-    wx.showLoading({ title: '统计中...' });
+    // 移除全局的 wx.showLoading，实现“点击秒进”的无遮挡体验
+    // 用户随时可以点击左上角返回或滚动页面
 
     // 1. 同步获取基础统计数据（毫秒级）
     api.get(`/stats/daily/${babyId}?query_date=${date}`).then(res => {
       this.setData({ stats: res });
 
-      // 2. 异步请求大模型分析建议，防止阻塞页面渲染
+      // 2. 异步请求大模型分析建议，只在建议卡片局部显示 Loading，完全不阻塞页面渲染
       this.fetchAISuggestion(babyId, date);
 
     }).catch(err => {
       console.error(err);
       wx.showToast({ title: '加载统计失败', icon: 'none' });
-    }).finally(() => {
-      wx.hideLoading();
     });
   },
 
