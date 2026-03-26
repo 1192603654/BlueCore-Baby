@@ -359,49 +359,50 @@ def get_ai_suggestion(baby_id):
     请直接输出建议正文。
     """
 
-    def generate_ai_response():
-        try:
-            logger.info("正在调用阿里云 DashScope 流式分析接口...")
-            client = OpenAI(
-                api_key=dashscope_api_key,
-                base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-            )
+    try:
+        logger.info("================ AI 请求开始 ================")
+        logger.info("正在调用阿里云 DashScope API (非流式)...")
+        messages = [{"role": "user", "content": [{"type": "text", "text": prompt}]}]
+        logger.info(f"请求参数: model=qwen3-vl-flash, messages={messages}")
 
-            response_stream = client.chat.completions.create(
-                model="qwen3-vl-flash",
-                messages=[
-                    {"role": "user", "content": [{"type": "text", "text": prompt}]}
-                ],
-                stream=True
-            )
+        client = OpenAI(
+            api_key=dashscope_api_key,
+            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        )
 
-            for chunk in response_stream:
-                if chunk.choices and len(chunk.choices) > 0:
-                    delta_content = chunk.choices[0].delta.content
-                    if delta_content:
-                        # 格式化为标准 SSE
-                        yield f"data: {json.dumps({'text': delta_content}, ensure_ascii=False)}\n\n"
+        response = client.chat.completions.create(
+            model="qwen3-vl-flash",
+            messages=messages,
+            stream=False
+        )
 
-                # 处理 token 消耗记录
-                if hasattr(chunk, 'usage') and chunk.usage:
-                    if hasattr(chunk.usage, 'reasoning_tokens') and chunk.usage.reasoning_tokens is not None:
-                        logger.info(f"DashScope 消耗推理 Token (Reasoning Tokens): {chunk.usage.reasoning_tokens}")
-                    elif hasattr(chunk.usage, 'total_tokens') and chunk.usage.total_tokens is not None:
-                        logger.info(f"DashScope 消耗总 Token: {chunk.usage.total_tokens}")
+        logger.info(f"响应结果 (Raw): {response}")
 
-            # 结束流
-            yield "data: [DONE]\n\n"
+        if response.choices and len(response.choices) > 0:
+            ai_suggestion = response.choices[0].message.content
+        else:
+            ai_suggestion = "【提示】未获取到有效建议。"
+            logger.warning("模型返回的 choices 为空或不包含建议")
 
-        except openai.AuthenticationError as e:
-            logger.error(f"DashScope API 鉴权失败: {e}")
-            error_msg = "【智能管家提醒】API 密钥配置有误或已失效，请检查后台环境变量 DASHSCOPE_API_KEY 的设置。"
-            yield f"data: {json.dumps({'text': error_msg}, ensure_ascii=False)}\n\n"
-        except Exception as e:
-            logger.exception("DashScope 流式解析异常")
-            error_msg = "【错误】网络连接有点慢或暂时拥挤，请重试。"
-            yield f"data: {json.dumps({'text': error_msg}, ensure_ascii=False)}\n\n"
+        if hasattr(response, 'usage') and response.usage:
+            if hasattr(response.usage, 'reasoning_tokens') and response.usage.reasoning_tokens is not None:
+                logger.info(f"DashScope 消耗推理 Token (Reasoning Tokens): {response.usage.reasoning_tokens}")
+            elif hasattr(response.usage, 'total_tokens') and response.usage.total_tokens is not None:
+                logger.info(f"DashScope 消耗总 Token: {response.usage.total_tokens}")
 
-    return Response(stream_with_context(generate_ai_response()), content_type='text/event-stream')
+        logger.info("================ AI 请求结束 ================")
+        return jsonify({"ai_suggestion": ai_suggestion})
+
+    except openai.AuthenticationError as e:
+        logger.error(f"DashScope API 鉴权失败: {e}")
+        return jsonify({
+            "ai_suggestion": "【智能管家提醒】API 密钥配置有误或已失效，请检查后台环境变量 DASHSCOPE_API_KEY 的设置。"
+        })
+    except Exception as e:
+        logger.exception("DashScope API 调用异常")
+        return jsonify({
+            "ai_suggestion": "【错误】网络连接有点慢或暂时拥挤，请重试。"
+        }), 500
 
 # --- 路由：广告配置 ---
 @app.route('/config/ads', methods=['GET'])
