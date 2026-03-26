@@ -38,7 +38,14 @@
       <text class="ai-title">智能管家建议</text>
     </view>
     <view class="ai-content">
-      <text>{{stats.ai_suggestion || '暂无分析建议'}}</text>
+      <!-- 带有脉冲动画的加载中状态 -->
+      <view wx:if="{{aiLoading}}" class="loading-wrapper">
+        <view class="pulse-dot"></view>
+        <text class="ai-loading-text">正在分析宝宝数据中...</text>
+      </view>
+
+      <!-- 加载完成的文案 -->
+      <text wx:else>{{aiSuggestion}}</text>
     </view>
   </view>
 </view>

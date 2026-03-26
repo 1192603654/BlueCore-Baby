@@ -119,4 +119,32 @@
   line-height: 1.6;
   color: #555;
   text-align: justify;
+  min-height: 80rpx; /* 防止内容切换时抖动 */
+}
+
+/* AI 局部加载动画 */
+.loading-wrapper {
+  display: flex;
+  align-items: center;
+  padding: 10rpx 0;
+}
+
+.pulse-dot {
+  width: 16rpx;
+  height: 16rpx;
+  background-color: var(--brand-blue);
+  border-radius: 50%;
+  margin-right: 16rpx;
+  animation: pulse 1.2s infinite ease-in-out;
+}
+
+.ai-loading-text {
+  color: #8EB2D6;
+  font-style: italic;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.8); opacity: 0.5; }
 }

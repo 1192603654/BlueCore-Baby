@@ -1,0 +1,26 @@
+<view class="container page-bg">
+  <view class="form-card">
+    <view class="form-title">添加新宝宝</view>
+
+    <view class="form-group">
+      <view class="form-label">宝宝小名</view>
+      <input class="form-input" type="text" placeholder="请输入宝宝名字" value="{{babyName}}" bindinput="onNameInput" />
+    </view>
+
+    <view class="form-group">
+      <view class="form-label">出生日期</view>
+      <picker mode="date" value="{{selectedDate}}" end="{{today}}" bindchange="onDateChange">
+        <view class="form-input">{{selectedDate}}</view>
+      </picker>
+    </view>
+
+    <view class="form-group">
+      <view class="form-label">具体时间 (精确到分)</view>
+      <picker mode="time" value="{{selectedTime}}" bindchange="onTimeChange">
+        <view class="form-input">{{selectedTime}}</view>
+      </picker>
+    </view>
+
+    <view class="btn-submit" bindtap="submitBaby">完成添加</view>
+  </view>
+</view>
