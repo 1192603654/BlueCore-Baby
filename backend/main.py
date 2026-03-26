@@ -8,6 +8,7 @@ import requests
 import json
 import logging
 from sqlalchemy import func
+import openai
 from openai import OpenAI
 
 import models
@@ -385,6 +386,9 @@ def get_ai_suggestion(baby_id):
                     elif hasattr(chunk.usage, 'total_tokens') and chunk.usage.total_tokens is not None:
                         logger.info(f"DashScope 消耗总 Token: {chunk.usage.total_tokens}")
 
+        except openai.AuthenticationError as e:
+            logger.error(f"DashScope API 鉴权失败: {e}")
+            yield "【智能管家提醒】API 密钥配置有误或已失效，请检查后台环境变量 DASHSCOPE_API_KEY 的设置。"
         except Exception as e:
             logger.exception("DashScope 流式解析异常")
             yield "【错误】连接中断，请重试。"
