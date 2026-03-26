@@ -341,7 +341,9 @@ def get_ai_suggestion(baby_id):
 
     if not dashscope_api_key:
         logger.info("环境变量 DASHSCOPE_API_KEY 未配置，跳过大模型调用。")
-        return Response(stream_with_context(iter(["【智能管家建议】宝宝今天喝奶量和排便情况都在正常范围内。如果夜间有偶尔哭闹，可能是进入了猛涨期，建议多陪伴安抚，可以适当增加白天的活动量。请继续保持良好的记录习惯哦！"])), content_type='text/plain')
+        return jsonify({
+            "ai_suggestion": "【智能管家建议】宝宝今天喝奶量和排便情况都在正常范围内。如果夜间有偶尔哭闹，可能是进入了猛涨期，建议多陪伴安抚，可以适当增加白天的活动量。请继续保持良好的记录习惯哦！"
+        })
 
     prompt = f"""
     你是一位专业的育儿管家。请根据以下宝宝今天的记录数据，给出一小段温馨、简短（不超过80字）的育儿建议或鼓励。语气要像知心朋友一样，避免说教和过于生硬。
@@ -377,23 +379,29 @@ def get_ai_suggestion(baby_id):
                 if chunk.choices and len(chunk.choices) > 0:
                     delta_content = chunk.choices[0].delta.content
                     if delta_content:
-                        yield delta_content
+                        # 格式化为标准 SSE
+                        yield f"data: {json.dumps({'text': delta_content}, ensure_ascii=False)}\n\n"
 
-                # 处理 token 消耗记录（如果提供的话，在最后一个 chunk 里或者额外的 usage 字段）
+                # 处理 token 消耗记录
                 if hasattr(chunk, 'usage') and chunk.usage:
                     if hasattr(chunk.usage, 'reasoning_tokens') and chunk.usage.reasoning_tokens is not None:
                         logger.info(f"DashScope 消耗推理 Token (Reasoning Tokens): {chunk.usage.reasoning_tokens}")
                     elif hasattr(chunk.usage, 'total_tokens') and chunk.usage.total_tokens is not None:
                         logger.info(f"DashScope 消耗总 Token: {chunk.usage.total_tokens}")
 
+            # 结束流
+            yield "data: [DONE]\n\n"
+
         except openai.AuthenticationError as e:
             logger.error(f"DashScope API 鉴权失败: {e}")
-            yield "【智能管家提醒】API 密钥配置有误或已失效，请检查后台环境变量 DASHSCOPE_API_KEY 的设置。"
+            error_msg = "【智能管家提醒】API 密钥配置有误或已失效，请检查后台环境变量 DASHSCOPE_API_KEY 的设置。"
+            yield f"data: {json.dumps({'text': error_msg}, ensure_ascii=False)}\n\n"
         except Exception as e:
             logger.exception("DashScope 流式解析异常")
-            yield "【错误】连接中断，请重试。"
+            error_msg = "【错误】网络连接有点慢或暂时拥挤，请重试。"
+            yield f"data: {json.dumps({'text': error_msg}, ensure_ascii=False)}\n\n"
 
-    return Response(stream_with_context(generate_ai_response()), content_type='text/plain')
+    return Response(stream_with_context(generate_ai_response()), content_type='text/event-stream')
 
 # --- 路由：广告配置 ---
 @app.route('/config/ads', methods=['GET'])
